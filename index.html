@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ferretería El Tornillo | Inicio</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-container">
+      <a href="index.html" class="logo">🔧 Ferretería <span>El Tornillo</span></a>
+      <nav aria-label="Navegación principal">
+        <ul class="nav-list">
+          <li><a href="index.html" aria-current="page">Inicio</a></li>
+          <li><a href="productos.html">Productos</a></li>
+          <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-texto">
+        <h1>Todo para tu obra, a un click de distancia</h1>
+        <p>Herramientas, materiales de construcción y artículos de ferretería con despacho a todo Chile.</p>
+        <a href="productos.html" class="btn btn-primario">Ver productos</a>
+      </div>
+      <img src="img/FerreteriaconHerramientas.jpg" alt="Mostrador de la Ferretería El Tornillo con herramientas exhibidas" class="hero-img">
+    </section>
+
+    <!-- DESTACADOS -->
+    <section class="destacados" aria-labelledby="titulo-destacados">
+      <h2 id="titulo-destacados">Productos destacados</h2>
+      <div class="grid-productos">
+
+        <article class="producto-card">
+          <img src="img/Martillo.jpg" alt="Martillo de acero con mango de goma">
+          <h3>Martillo de acero 16 oz</h3>
+          <p class="precio">$6.990</p>
+          <button type="button" class="btn btn-secundario btn-agregar">Agregar al carro</button>
+        </article>
+
+        <article class="producto-card">
+          <img src="img/Taladro18v.webp" alt="Taladro percutor inalámbrico">
+          <h3>Taladro percutor 18V</h3>
+          <p class="precio">$54.990</p>
+          <button type="button" class="btn btn-secundario btn-agregar">Agregar al carro</button>
+        </article>
+
+        <article class="producto-card">
+          <img src="img/Llaves.jpg" alt="Set de llaves de boca combinadas">
+          <h3>Set de llaves (12 pzas)</h3>
+          <p class="precio">$18.490</p>
+          <button type="button" class="btn btn-secundario btn-agregar">Agregar al carro</button>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- VIDEO -->
+    <section class="video-seccion" aria-labelledby="titulo-video">
+      <h2 id="titulo-video">Conoce nuestra tienda</h2>
+      <p>Un recorrido rápido por nuestras instalaciones y la atención que ofrecemos.</p>
+      <video controls width="100%" poster="img/hero-ferreteria.jpg">
+        <source src="videos/promo-ferreteria.mp4" type="video/mp4">
+        Tu navegador no soporta el elemento de video. Puedes
+        <a href="videos/promo-ferreteria.mp4">descargar el video aquí</a>.
+      </video>
+    </section>
+
+    <!-- SOBRE NOSOTROS -->
+    <section class="sobre-nosotros" aria-labelledby="titulo-nosotros">
+      <h2 id="titulo-nosotros">Sobre nosotros</h2>
+      <p>Ferretería El Tornillo lleva más de 15 años entregando herramientas y materiales de calidad a
+      maestros, empresas constructoras y público general. Contamos con despacho a domicilio y retiro en tienda.</p>
+      <a href="contacto.html" class="btn btn-primario">Contáctanos</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div>
+        <h3>Ferretería El Tornillo</h3>
+        <p>Av. Las Industrias 1234, Puente Alto, Santiago</p>
+        <p>Lunes a sábado: 09:00 - 19:00 hrs</p>
+      </div>
+      <div>
+        <h3>Contacto</h3>
+        <p>Teléfono: +56 9 1234 5678</p>
+        <p>Email: contacto@eltornillo.cl</p>
+      </div>
+      <nav aria-label="Enlaces del pie de página">
+        <h3>Enlaces</h3>
+        <ul class="footer-nav">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="productos.html">Productos</a></li>
+          <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="copyright">&copy; 2026 Ferretería El Tornillo. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="js/validaciones.js"></script>
+</body>
+</html>
