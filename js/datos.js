@@ -110,3 +110,66 @@ function registrarUsuario(nombre, rut, correo, telefono, clave, rol = "cliente")
 
   return { exito: true, mensaje: "Cuenta creada correctamente." };
 }
+
+// Busca un usuario que coincida con correo y contraseña exactos
+function iniciarSesion(correo, clave) {
+  const usuarios = obtenerUsuarios();
+  const usuario = usuarios.find((u) => u.correo === correo && u.clave === clave);
+
+  if (!usuario) {
+    return { exito: false, mensaje: "Correo o contraseña incorrectos." };
+  }
+
+  // Guardamos quién inició sesión, para que otras páginas (los paneles) sepan quién es
+  localStorage.setItem("sesionActual", JSON.stringify(usuario));
+
+  return { exito: true, usuario: usuario };
+}
+
+// Trae los datos del usuario que tiene la sesión iniciada actualmente (o null si nadie ha iniciado sesión)
+function obtenerSesionActual() {
+  const datos = localStorage.getItem("sesionActual");
+  return datos ? JSON.parse(datos) : null;
+}
+
+// Cierra la sesión actual (lo usaremos en los paneles, con un botón "Cerrar sesión")
+function cerrarSesion() {
+  localStorage.removeItem("sesionActual");
+}
+
+// ============================
+// PRODUCTOS
+// ============================
+
+// Trae la lista de productos guardada, o un arreglo vacío si no hay ninguno todavía
+function obtenerProductos() {
+  const datos = localStorage.getItem("productos");
+  return datos ? JSON.parse(datos) : [];
+}
+
+// Guarda la lista completa de productos en localStorage
+function guardarProductos(listaProductos) {
+  localStorage.setItem("productos", JSON.stringify(listaProductos));
+}
+
+// Si no hay productos guardados todavía, carga una lista de ejemplo (solo la primera vez)
+function inicializarProductos() {
+  const productosExistentes = obtenerProductos();
+
+  // Si ya hay productos guardados, no hacemos nada (para no duplicar ni pisar cambios del admin)
+  if (productosExistentes.length > 0) return;
+
+  const productosDeEjemplo = [
+    { id: 1, nombre: "Martillo de acero 16 oz", precio: 6990, stock: 25, imagen: "img/martillo.jpg" },
+    { id: 2, nombre: "Taladro percutor 18V", precio: 54990, stock: 10, imagen: "img/taladro.jpg" },
+    { id: 3, nombre: "Set de llaves (12 pzas)", precio: 18490, stock: 15, imagen: "img/llaves.jpg" },
+    { id: 4, nombre: "Escalera aluminio 6 peldaños", precio: 32990, stock: 8, imagen: "img/escalera.jpg" },
+    { id: 5, nombre: "Pintura látex 1 galón", precio: 14990, stock: 30, imagen: "img/pintura.jpg" },
+    { id: 6, nombre: "Caja tornillos autoperforantes", precio: 4490, stock: 50, imagen: "img/tornillos.jpg" },
+  ];
+
+  guardarProductos(productosDeEjemplo);
+}
+
+// Ejecutamos esto apenas se carga datos.js, para asegurarnos de que siempre haya productos
+inicializarProductos();
