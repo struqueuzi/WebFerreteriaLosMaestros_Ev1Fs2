@@ -1,0 +1,198 @@
+/* ============================
+   VARIABLES Y RESET
+   ============================ */
+:root {
+  --color-primario: #d97706;
+  --color-primario-oscuro: #b45309;
+  --color-secundario: #1f2937;
+  --color-fondo: #f9fafb;
+  --color-borde: #e5e7eb;
+  --color-error: #dc2626;
+  --color-exito: #16a34a;
+  --radio: 8px;
+  --sombra: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: var(--color-secundario);
+  background-color: var(--color-fondo);
+  line-height: 1.5;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-primario-oscuro);
+}
+
+/* ============================
+   HEADER Y NAV
+   ============================ */
+header {
+  background-color: var(--color-secundario);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+header a.logo {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+nav a {
+  color: #fff;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* ============================
+   CONTENEDOR PRINCIPAL
+   ============================ */
+main {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+section {
+  background: #fff;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+}
+
+/* ============================
+   FORMULARIOS (login, registro, admin)
+   ============================ */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 500px;
+}
+
+label {
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+input, select, textarea {
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--color-primario);
+  border-color: var(--color-primario);
+}
+
+/* ============================
+   BOTONES
+   ============================ */
+button {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radio);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background-color: var(--color-primario);
+  color: #fff;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--color-primario-oscuro);
+}
+
+/* ============================
+   TARJETAS DE PRODUCTOS / USUARIOS / PEDIDOS
+   (los div que genera JavaScript dentro de cada lista)
+   ============================ */
+#lista-productos > div,
+#lista-inventario > div,
+#lista-productos-admin > div,
+#lista-usuarios > div,
+#lista-pedidos-vendedor > div,
+#historial-compras > div {
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #fafafa;
+}
+
+/* ============================
+   MENSAJES DE ERROR Y ÉXITO
+   ============================ */
+.error,
+#mensaje-error {
+  color: var(--color-error);
+  font-size: 0.9rem;
+}
+
+.exito,
+.mensaje-pedido,
+.mensaje-producto,
+.mensaje-rol,
+.mensaje-stock,
+.mensaje-estado {
+  color: var(--color-exito);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* ============================
+   FOOTER
+   ============================ */
+footer {
+  background-color: var(--color-secundario);
+  color: #d1d5db;
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: 3rem;
+  font-size: 0.85rem;
+}
+
+footer a {
+  color: #fff;
+}
