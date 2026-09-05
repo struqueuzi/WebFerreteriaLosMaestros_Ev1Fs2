@@ -13,6 +13,18 @@
 
     <h2>Usuarios registrados</h2>
     <div id="lista-usuarios"></div>
+
+    <h2>Gestión de productos</h2>
+    <div id="lista-productos-admin"></div>
+
+    <h3>Agregar producto nuevo</h3>
+    <form id="form-nuevo-producto">
+      <label>Nombre: <input type="text" id="nuevo-nombre" required></label>
+      <label>Precio: <input type="number" id="nuevo-precio" min="0" required></label>
+      <label>Stock inicial: <input type="number" id="nuevo-stock" min="0" required></label>
+      <label>Imagen (ruta): <input type="text" id="nuevo-imagen" placeholder="img/nombre.jpg" required></label>
+      <button type="submit">Agregar producto</button>
+    </form>
   </main>
 
   <script src="js/datos.js"></script>

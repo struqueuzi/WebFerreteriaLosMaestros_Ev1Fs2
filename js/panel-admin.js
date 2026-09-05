@@ -58,3 +58,86 @@ usuarios.forEach(function (usuario) {
 
   contenedorUsuarios.appendChild(fila);
 });
+
+// Buscamos el div vacío donde vamos a mostrar los productos
+const contenedorProductosAdmin = document.getElementById("lista-productos-admin");
+
+// Traemos todos los productos guardados
+const productosAdmin = obtenerProductos();
+
+// Función que dibuja TODOS los productos en pantalla (la hacemos función porque la vamos a volver a llamar después de eliminar uno)
+function dibujarProductosAdmin() {
+  contenedorProductosAdmin.innerHTML = ""; // limpiamos lo que hubiera antes de volver a dibujar
+
+  productosAdmin.forEach(function (producto) {
+    const fila = document.createElement("div");
+
+    fila.innerHTML = `
+      <img src="${producto.imagen}" alt="${producto.nombre}" width="100">
+      <label>Nombre: <input type="text" class="input-nombre" value="${producto.nombre}"></label>
+      <label>Precio: <input type="number" class="input-precio" value="${producto.precio}" min="0"></label>
+      <label>Stock: <input type="number" class="input-stock" value="${producto.stock}" min="0"></label>
+      <label>Imagen (ruta): <input type="text" class="input-imagen" value="${producto.imagen}"></label>
+      <button class="btn-guardar-producto">Guardar cambios</button>
+      <button class="btn-eliminar-producto">Eliminar producto</button>
+      <p class="mensaje-producto"></p>
+    `;
+
+    const inputNombre = fila.querySelector(".input-nombre");
+    const inputPrecio = fila.querySelector(".input-precio");
+    const inputStock = fila.querySelector(".input-stock");
+    const inputImagen = fila.querySelector(".input-imagen");
+    const botonGuardar = fila.querySelector(".btn-guardar-producto");
+    const botonEliminar = fila.querySelector(".btn-eliminar-producto");
+    const mensajeProducto = fila.querySelector(".mensaje-producto");
+
+    botonGuardar.addEventListener("click", function () {
+      producto.nombre = inputNombre.value;
+      producto.precio = parseInt(inputPrecio.value, 10);
+      producto.stock = parseInt(inputStock.value, 10);
+      producto.imagen = inputImagen.value;
+
+      guardarProductos(productosAdmin);
+      mensajeProducto.textContent = "Producto actualizado correctamente.";
+    });
+
+    botonEliminar.addEventListener("click", function () {
+      // Buscamos la posición de este producto en el arreglo, para sacarlo
+      const indice = productosAdmin.indexOf(producto);
+      productosAdmin.splice(indice, 1); // elimina 1 elemento desde esa posición
+
+      guardarProductos(productosAdmin);
+      dibujarProductosAdmin(); // volvemos a dibujar la lista, ya sin este producto
+    });
+
+    contenedorProductosAdmin.appendChild(fila);
+  });
+}
+
+dibujarProductosAdmin();
+
+// Buscamos el formulario de agregar producto
+const formNuevoProducto = document.getElementById("form-nuevo-producto");
+
+formNuevoProducto.addEventListener("submit", function (evento) {
+  evento.preventDefault();
+
+  // Armamos el producto nuevo con lo que escribió el admin
+  const productoNuevo = {
+    id: Date.now(),
+    nombre: document.getElementById("nuevo-nombre").value,
+    precio: parseInt(document.getElementById("nuevo-precio").value, 10),
+    stock: parseInt(document.getElementById("nuevo-stock").value, 10),
+    imagen: document.getElementById("nuevo-imagen").value,
+  };
+
+  // Lo agregamos al arreglo que ya teníamos en memoria, y guardamos
+  productosAdmin.push(productoNuevo);
+  guardarProductos(productosAdmin);
+
+  // Volvemos a dibujar la lista completa, ahora con el producto nuevo incluido
+  dibujarProductosAdmin();
+
+  // Limpiamos el formulario para que quede listo para agregar otro
+  formNuevoProducto.reset();
+});
