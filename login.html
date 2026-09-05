@@ -1,36 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Ferretería Los Maestros | Iniciar sesión</title>
     <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
-      <main>
-    <!-- Título de la página -->
-    <h1>Iniciar sesión</h1>
 
-    <!-- id="form-login" para poder encontrarlo desde JavaScript -->
-    <form id="form-login">
+  <header>
+    <a href="login.html" class="logo">Ferretería Los Maestros</a>
+    <nav>
+      <ul>
+        <li><a href="registro.html">Crear cuenta</a></li>
+      </ul>
+    </nav>
+  </header>
 
-      <label for="correo">Correo electrónico</label>
-      <input type="email" id="correo" name="correo" required>
+  <main>
+    <section>
+      <h1>Iniciar sesión</h1>
 
-      <label for="clave">Contraseña</label>
-      <input type="password" id="clave" name="clave" required>
+      <form id="form-login">
+        <label for="correo">Correo electrónico</label>
+        <input type="email" id="correo" name="correo" required>
 
-      <!-- Acá mostraremos el error si el correo o la contraseña están mal -->
-      <p id="mensaje-error"></p>
+        <label for="clave">Contraseña</label>
+        <input type="password" id="clave" name="clave" required>
 
-      <button type="submit">Iniciar sesión</button>
+        <p id="mensaje-error"></p>
 
-    </form>
+        <button type="submit">Iniciar sesión</button>
+      </form>
 
-    <!-- Link para quien todavía no tiene cuenta -->
-    <p>¿No tienes cuenta? <a href="registro.html">Crea una aquí</a></p>
+      <p>¿No tienes cuenta? <a href="registro.html">Crea una aquí</a></p>
+    </section>
   </main>
-    <script src="js/datos.js"></script>
+
+  <footer>
+    <p>Ferretería Los Maestros — Av. Las Industrias 1234, Puente Alto, Santiago</p>
+    <p>&copy; 2026 Ferretería Los Maestros. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="js/datos.js"></script>
   <script src="js/login.js"></script>
 </body>
 </html>

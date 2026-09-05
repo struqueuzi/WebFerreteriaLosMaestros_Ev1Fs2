@@ -7,16 +7,37 @@
     <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
-  <main>
-    <h1 id="titulo-bienvenida">Panel Vendedor</h1>
-    <p>Correo: <span id="correo-usuario"></span></p>
-    <button id="btn-cerrar-sesion">Cerrar sesión</button>
 
-    <h2>Inventario</h2>
-    <div id="lista-inventario"></div>
-    <h2>Pedidos de clientes</h2>
-    <div id="lista-pedidos-vendedor"></div>
+  <header>
+    <a href="panel-vendedor.html" class="logo">Ferretería Los Maestros</a>
+    <nav>
+      <ul>
+        <li><span id="correo-usuario"></span></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h1 id="titulo-bienvenida">Panel Vendedor</h1>
+      <button id="btn-cerrar-sesion">Cerrar sesión</button>
+    </section>
+
+    <section>
+      <h2>Inventario</h2>
+      <div id="lista-inventario"></div>
+    </section>
+
+    <section>
+      <h2>Pedidos de clientes</h2>
+      <div id="lista-pedidos-vendedor"></div>
+    </section>
   </main>
+
+  <footer>
+    <p>Ferretería Los Maestros — Av. Las Industrias 1234, Puente Alto, Santiago</p>
+    <p>&copy; 2026 Ferretería Los Maestros. Todos los derechos reservados.</p>
+  </footer>
 
   <script src="js/datos.js"></script>
   <script src="js/panel-vendedor.js"></script>

@@ -1,50 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ferretería Los Maestros | Crear cuenta</title>
-  <link rel="stylesheet" href="css/estilos.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferretería Los Maestros | Crear cuenta</title>
+    <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
-      <main>
-    <!-- Título principal de la página -->
-    <h1>Crear cuenta</h1>
 
-    <!-- id="form-registro" nos permite encontrar este formulario desde JavaScript más adelante -->
-    <form id="form-registro">
+  <header>
+    <a href="login.html" class="logo">Ferretería Los Maestros</a>
+    <nav>
+      <ul>
+        <li><a href="login.html">Iniciar sesión</a></li>
+      </ul>
+    </nav>
+  </header>
 
-      <!-- El "for" del label debe ser IGUAL al "id" del input, así quedan asociados -->
-      <label for="nombre">Nombre completo</label>
-      <input type="text" id="nombre" name="nombre" required>
-      <!-- required = el navegador no deja enviar el formulario si este campo está vacío -->
+  <main>
+    <section>
+      <h1>Crear cuenta</h1>
 
-      <label for="rut">RUT</label>
-      <input type="text" id="rut" name="rut" placeholder="Ej: 12345678-9" required>
-      <!-- placeholder = texto de ejemplo que se ve gris dentro del campo, no es un valor real -->
+      <form id="form-registro">
 
-      <label for="correo">Correo electrónico</label>
-      <input type="email" id="correo" name="correo" required>
-      <!-- type="email" hace que el navegador valide automáticamente que tenga formato de correo (con @) -->
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" required>
 
-      <label for="telefono">Teléfono</label>
-      <input type="tel" id="telefono" name="telefono" placeholder="Ej: +56912345678" required>
-      <!-- type="tel" es para números de teléfono (en celulares muestra el teclado numérico) -->
+        <label for="rut">RUT</label>
+        <input type="text" id="rut" name="rut" placeholder="Ej: 12345678-9" required>
 
-      <label for="clave">Contraseña</label>
-      <input type="password" id="clave" name="clave" required>
-      <!-- type="password" oculta lo que se escribe con puntitos -->
+        <label for="correo">Correo electrónico</label>
+        <input type="email" id="correo" name="correo" required>
 
-      <!-- Este párrafo empieza vacío. Aquí vamos a mostrar el mensaje de error
-           (ej: "ya existe una cuenta con ese RUT") cuando conectemos el JavaScript -->
-      <p id="mensaje-error"></p>
+        <label for="telefono">Teléfono</label>
+        <input type="tel" id="telefono" name="telefono" placeholder="Ej: +56912345678" required>
 
-      <!-- type="submit" hace que al hacer clic se dispare el envío del formulario -->
-      <button type="submit">Crear cuenta</button>
+        <label for="clave">Contraseña</label>
+        <input type="password" id="clave" name="clave" required>
 
-    </form>
+        <p id="mensaje-error"></p>
+
+        <button type="submit">Crear cuenta</button>
+
+      </form>
+    </section>
   </main>
-    <script src="js/datos.js"></script>
-    <script src="js/registro.js"></script>
+
+  <footer>
+    <p>Ferretería Los Maestros — Av. Las Industrias 1234, Puente Alto, Santiago</p>
+    <p>&copy; 2026 Ferretería Los Maestros. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="js/datos.js"></script>
+  <script src="js/registro.js"></script>
 </body>
 </html>
