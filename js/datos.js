@@ -1,6 +1,6 @@
 // ============================
 // datos.js
-// Maneja usuarios y productos guardados en localStorage
+// Maneja usuarios, productos y pedidos guardados en localStorage
 // ============================
 
 // Trae la lista de usuarios guardada, o un arreglo vacío si no hay ninguno todavía
@@ -173,3 +173,84 @@ function inicializarProductos() {
 
 // Ejecutamos esto apenas se carga datos.js, para asegurarnos de que siempre haya productos
 inicializarProductos();
+
+// ============================
+// PEDIDOS
+// ============================
+
+// Trae la lista de pedidos guardada, o un arreglo vacío si no hay ninguno todavía
+function obtenerPedidos() {
+  const datos = localStorage.getItem("pedidos");
+  return datos ? JSON.parse(datos) : [];
+}
+
+// Guarda la lista completa de pedidos en localStorage
+function guardarPedidos(listaPedidos) {
+  localStorage.setItem("pedidos", JSON.stringify(listaPedidos));
+}
+
+// Crea un pedido nuevo para un producto específico, y descuenta el stock
+function hacerPedido(clienteCorreo, productoId, cantidad) {
+  const productos = obtenerProductos();
+  const producto = productos.find((p) => p.id === productoId);
+
+  if (!producto) {
+    return { exito: false, mensaje: "El producto no existe." };
+  }
+
+  if (producto.stock < cantidad) {
+    return { exito: false, mensaje: "No hay suficiente stock disponible." };
+  }
+
+  // Descontamos el stock del producto
+  producto.stock = producto.stock - cantidad;
+  guardarProductos(productos);
+
+  // Creamos el pedido nuevo
+  const nuevoPedido = {
+    id: Date.now(),
+    clienteCorreo: clienteCorreo,
+    productoId: producto.id,
+    productoNombre: producto.nombre,
+    cantidad: cantidad,
+    total: producto.precio * cantidad,
+    estado: "Pendiente",
+    fecha: new Date().toLocaleString(),
+  };
+
+  const pedidos = obtenerPedidos();
+  pedidos.push(nuevoPedido);
+  guardarPedidos(pedidos);
+
+  return { exito: true, mensaje: "Pedido realizado con éxito.", pedido: nuevoPedido };
+}
+
+// ============================
+// ADMIN INICIAL
+// ============================
+
+// Crea una cuenta de administrador automáticamente, solo si no existe ninguna todavía
+function inicializarAdmin() {
+  const usuarios = obtenerUsuarios();
+
+  // Revisamos si ya existe algún admin
+  const yaExisteAdmin = usuarios.some((u) => u.rol === "admin");
+  if (yaExisteAdmin) return;
+
+  // Si no existe, creamos uno con datos fijos de prueba
+  const adminInicial = {
+    id: Date.now(),
+    nombre: "Administrador",
+    rut: "11111111-1",
+    correo: "admin@ferreteria.cl",
+    telefono: "+56911111111",
+    clave: "admin123",
+    rol: "admin",
+    saldoPendiente: 0,
+  };
+
+  usuarios.push(adminInicial);
+  guardarUsuarios(usuarios);
+}
+
+inicializarAdmin();
