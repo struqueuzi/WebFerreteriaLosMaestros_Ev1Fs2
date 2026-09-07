@@ -65,6 +65,9 @@ const contenedorProductosAdmin = document.getElementById("lista-productos-admin"
 // Traemos todos los productos guardados
 const productosAdmin = obtenerProductos();
 
+// Lista de categorías disponibles (la reutilizamos para armar el <select> de cada producto)
+const categoriasDisponibles = ["Herramientas manuales", "Herramientas eléctricas", "Materiales de construcción", "Sin categoría"];
+
 // Función que dibuja TODOS los productos en pantalla (la hacemos función porque la vamos a volver a llamar después de eliminar uno)
 function dibujarProductosAdmin() {
   contenedorProductosAdmin.innerHTML = ""; // limpiamos lo que hubiera antes de volver a dibujar
@@ -72,12 +75,18 @@ function dibujarProductosAdmin() {
   productosAdmin.forEach(function (producto) {
     const fila = document.createElement("div");
 
+    // Armamos las opciones del <select> de categoría dinámicamente a partir del arreglo de arriba
+    const opcionesCategoria = categoriasDisponibles
+      .map((cat) => `<option value="${cat}">${cat}</option>`)
+      .join("");
+
     fila.innerHTML = `
       <img src="${producto.imagen}" alt="${producto.nombre}" width="100">
       <label>Nombre: <input type="text" class="input-nombre" value="${producto.nombre}"></label>
       <label>Precio: <input type="number" class="input-precio" value="${producto.precio}" min="0"></label>
       <label>Stock: <input type="number" class="input-stock" value="${producto.stock}" min="0"></label>
       <label>Imagen (ruta): <input type="text" class="input-imagen" value="${producto.imagen}"></label>
+      <label>Categoría: <select class="select-categoria">${opcionesCategoria}</select></label>
       <button class="btn-guardar-producto">Guardar cambios</button>
       <button class="btn-eliminar-producto">Eliminar producto</button>
       <p class="mensaje-producto"></p>
@@ -87,15 +96,20 @@ function dibujarProductosAdmin() {
     const inputPrecio = fila.querySelector(".input-precio");
     const inputStock = fila.querySelector(".input-stock");
     const inputImagen = fila.querySelector(".input-imagen");
+    const selectCategoria = fila.querySelector(".select-categoria");
     const botonGuardar = fila.querySelector(".btn-guardar-producto");
     const botonEliminar = fila.querySelector(".btn-eliminar-producto");
     const mensajeProducto = fila.querySelector(".mensaje-producto");
+
+    // Dejamos seleccionada la categoría que el producto ya tiene
+    selectCategoria.value = producto.categoria;
 
     botonGuardar.addEventListener("click", function () {
       producto.nombre = inputNombre.value;
       producto.precio = parseInt(inputPrecio.value, 10);
       producto.stock = parseInt(inputStock.value, 10);
       producto.imagen = inputImagen.value;
+      producto.categoria = selectCategoria.value;
 
       guardarProductos(productosAdmin);
       mensajeProducto.textContent = "Producto actualizado correctamente.";
@@ -129,6 +143,7 @@ formNuevoProducto.addEventListener("submit", function (evento) {
     precio: parseInt(document.getElementById("nuevo-precio").value, 10),
     stock: parseInt(document.getElementById("nuevo-stock").value, 10),
     imagen: document.getElementById("nuevo-imagen").value,
+    categoria: document.getElementById("nuevo-categoria").value,
   };
 
   // Lo agregamos al arreglo que ya teníamos en memoria, y guardamos

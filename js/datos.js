@@ -138,6 +138,17 @@ function cerrarSesion() {
 }
 
 // ============================
+// CATEGORÍAS Y SUBCATEGORÍAS
+// ============================
+
+// Estructura fija: cada categoría con su lista de subcategorías (la usamos para armar el menú desplegable)
+const CATEGORIAS_Y_SUBCATEGORIAS = {
+  "Herramientas manuales": ["Martillos", "Llaves", "Escaleras"],
+  "Herramientas eléctricas": ["Taladros"],
+  "Materiales de construcción": ["Pinturas", "Tornillos y anclajes"],
+};
+
+// ============================
 // PRODUCTOS
 // ============================
 
@@ -160,12 +171,12 @@ function inicializarProductos() {
   if (productosExistentes.length > 0) return;
 
   const productosDeEjemplo = [
-    { id: 1, nombre: "Martillo de acero 16 oz", precio: 6990, stock: 25, imagen: "img/martillo.jpg" },
-    { id: 2, nombre: "Taladro percutor 18V", precio: 54990, stock: 10, imagen: "img/taladro.jpg" },
-    { id: 3, nombre: "Set de llaves (12 pzas)", precio: 18490, stock: 15, imagen: "img/llaves.jpg" },
-    { id: 4, nombre: "Escalera aluminio 6 peldaños", precio: 32990, stock: 8, imagen: "img/escalera.jpg" },
-    { id: 5, nombre: "Pintura látex 1 galón", precio: 14990, stock: 30, imagen: "img/pintura.jpg" },
-    { id: 6, nombre: "Caja tornillos autoperforantes", precio: 4490, stock: 50, imagen: "img/tornillos.jpg" },
+    { id: 1, nombre: "Martillo de acero 16 oz", precio: 6990, stock: 25, imagen: "img/martillo.jpg", categoria: "Herramientas manuales", subcategoria: "Martillos" },
+    { id: 2, nombre: "Taladro percutor 18V", precio: 54990, stock: 10, imagen: "img/taladro.jpg", categoria: "Herramientas eléctricas", subcategoria: "Taladros" },
+    { id: 3, nombre: "Set de llaves (12 pzas)", precio: 18490, stock: 15, imagen: "img/llaves.jpg", categoria: "Herramientas manuales", subcategoria: "Llaves" },
+    { id: 4, nombre: "Escalera aluminio 6 peldaños", precio: 32990, stock: 8, imagen: "img/escalera.jpg", categoria: "Herramientas manuales", subcategoria: "Escaleras" },
+    { id: 5, nombre: "Pintura látex 1 galón", precio: 14990, stock: 30, imagen: "img/pintura.jpg", categoria: "Materiales de construcción", subcategoria: "Pinturas" },
+    { id: 6, nombre: "Caja tornillos autoperforantes", precio: 4490, stock: 50, imagen: "img/tornillos.jpg", categoria: "Materiales de construcción", subcategoria: "Tornillos y anclajes" },
   ];
 
   guardarProductos(productosDeEjemplo);
@@ -173,6 +184,30 @@ function inicializarProductos() {
 
 // Ejecutamos esto apenas se carga datos.js, para asegurarnos de que siempre haya productos
 inicializarProductos();
+
+// Le asigna "Sin categoría" / "General" a cualquier producto que ya exista y no tenga esos campos todavía
+// (por ejemplo, productos agregados desde el panel admin antes de que existiera este campo)
+function migrarCategoriasFaltantes() {
+  const productos = obtenerProductos();
+  let huboCambios = false;
+
+  productos.forEach(function (producto) {
+    if (!producto.categoria) {
+      producto.categoria = "Sin categoría";
+      huboCambios = true;
+    }
+    if (!producto.subcategoria) {
+      producto.subcategoria = "General";
+      huboCambios = true;
+    }
+  });
+
+  if (huboCambios) {
+    guardarProductos(productos);
+  }
+}
+
+migrarCategoriasFaltantes();
 
 // ============================
 // PEDIDOS

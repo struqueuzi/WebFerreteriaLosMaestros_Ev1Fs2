@@ -196,3 +196,63 @@ footer {
 footer a {
   color: #fff;
 }
+
+/* ============================
+   MENÚ DE CATEGORÍAS (estilo Ripley)
+   ============================ */
+#menu-categorias {
+  margin-bottom: 1.5rem;
+}
+
+#menu-categorias .menu-categorias-lista {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid var(--color-borde);
+  padding-bottom: 0.75rem;
+}
+
+#menu-categorias a {
+  color: var(--color-secundario);
+  font-weight: 600;
+}
+
+#menu-categorias a:hover {
+  color: var(--color-primario);
+}
+
+.menu-item-categoria {
+  position: relative;
+}
+
+.submenu-categoria {
+  list-style: none;
+  padding: 1rem 0 0.5rem 0;
+  margin: 0;
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  min-width: 180px;
+  z-index: 10;
+}
+
+.submenu-categoria li {
+  padding: 0.4rem 1rem;
+}
+
+.submenu-categoria a {
+  color: var(--color-secundario);
+  font-weight: 400;
+}
+
+/* Al pasar el mouse por la categoría, se despliega su submenú (como Ripley) */
+.menu-item-categoria:hover .submenu-categoria {
+  display: block;
+}

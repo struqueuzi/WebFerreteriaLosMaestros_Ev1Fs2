@@ -19,46 +19,118 @@ document.getElementById("btn-cerrar-sesion").addEventListener("click", function 
 // Buscamos el div vacío donde vamos a dibujar los productos
 const contenedorProductos = document.getElementById("lista-productos");
 
-// Traemos todos los productos guardados
-const productos = obtenerProductos();
+// Traemos todos los productos guardados (esta lista completa nunca cambia, solo la usamos para filtrar)
+const todosLosProductos = obtenerProductos();
 
-// Por cada producto, creamos su "tarjeta" en HTML y la agregamos al contenedor
-productos.forEach(function (producto) {
-  const tarjeta = document.createElement("div");
+// Dibuja una lista de productos específica (puede ser todos, o un filtro por categoría/subcategoría)
+function dibujarProductos(listaProductos) {
+  contenedorProductos.innerHTML = ""; // limpiamos lo que hubiera antes de volver a dibujar
 
-  tarjeta.innerHTML = `
-    <img src="${producto.imagen}" alt="${producto.nombre}" width="120">
-    <h3>${producto.nombre}</h3>
-    <p>Precio: $${producto.precio}</p>
-    <p>Stock disponible: <span class="stock-actual">${producto.stock}</span></p>
-    <label>Cantidad: <input type="number" class="input-cantidad" value="1" min="1"></label>
-    <button class="btn-pedido">Hacer pedido</button>
-    <p class="mensaje-pedido"></p>
+  if (listaProductos.length === 0) {
+    contenedorProductos.textContent = "No hay productos en esta subcategoría.";
+    return;
+  }
+
+  listaProductos.forEach(function (producto) {
+    const tarjeta = document.createElement("div");
+
+    tarjeta.innerHTML = `
+      <img src="${producto.imagen}" alt="${producto.nombre}" width="120">
+      <h3>${producto.nombre}</h3>
+      <p>Precio: $${producto.precio}</p>
+      <p>Stock disponible: <span class="stock-actual">${producto.stock}</span></p>
+      <label>Cantidad: <input type="number" class="input-cantidad" value="1" min="1"></label>
+      <button class="btn-pedido">Hacer pedido</button>
+      <p class="mensaje-pedido"></p>
+    `;
+
+    const botonPedido = tarjeta.querySelector(".btn-pedido");
+    const inputCantidad = tarjeta.querySelector(".input-cantidad");
+    const mensajePedido = tarjeta.querySelector(".mensaje-pedido");
+    const spanStock = tarjeta.querySelector(".stock-actual");
+
+    botonPedido.addEventListener("click", function () {
+      const cantidad = parseInt(inputCantidad.value, 10);
+      const resultado = hacerPedido(usuarioActual.correo, producto.id, cantidad);
+
+      mensajePedido.textContent = resultado.mensaje;
+
+      if (resultado.exito) {
+        producto.stock = producto.stock - cantidad;
+        spanStock.textContent = producto.stock;
+      }
+    });
+
+    contenedorProductos.appendChild(tarjeta);
+  });
+}
+
+// Al cargar la página, mostramos TODOS los productos (sin filtro)
+dibujarProductos(todosLosProductos);
+
+// ============================
+// MENÚ DE CATEGORÍAS Y SUBCATEGORÍAS
+// ============================
+
+const contenedorMenu = document.getElementById("menu-categorias");
+
+// CATEGORIAS_Y_SUBCATEGORIAS viene de datos.js: { "Herramientas manuales": ["Martillos", "Llaves", ...], ... }
+let menuHtml = '<ul class="menu-categorias-lista"><li><a href="#" class="link-categoria" data-categoria="todos">Todos los productos</a></li>';
+
+Object.keys(CATEGORIAS_Y_SUBCATEGORIAS).forEach(function (categoria) {
+  const subcategorias = CATEGORIAS_Y_SUBCATEGORIAS[categoria];
+
+  menuHtml += `
+    <li class="menu-item-categoria">
+      <a href="#" class="link-categoria" data-categoria="${categoria}">${categoria} ▾</a>
+      <ul class="submenu-categoria">
   `;
 
-  // Buscamos, DENTRO de esta tarjeta específica, el botón, el input y el mensaje
-  const botonPedido = tarjeta.querySelector(".btn-pedido");
-  const inputCantidad = tarjeta.querySelector(".input-cantidad");
-  const mensajePedido = tarjeta.querySelector(".mensaje-pedido");
-  const spanStock = tarjeta.querySelector(".stock-actual");
-
-  botonPedido.addEventListener("click", function () {
-    // Convertimos el valor del input (que llega como texto) a número
-    const cantidad = parseInt(inputCantidad.value, 10);
-
-    // Llamamos a la función de datos.js, usando el correo del usuario logueado
-    const resultado = hacerPedido(usuarioActual.correo, producto.id, cantidad);
-
-    mensajePedido.textContent = resultado.mensaje;
-
-    if (resultado.exito) {
-      // Si el pedido se hizo bien, actualizamos el stock que se ve en pantalla, sin recargar la página
-      producto.stock = producto.stock - cantidad;
-      spanStock.textContent = producto.stock;
-    }
+  subcategorias.forEach(function (subcategoria) {
+    menuHtml += `<li><a href="#" class="link-subcategoria" data-categoria="${categoria}" data-subcategoria="${subcategoria}">${subcategoria}</a></li>`;
   });
 
-  contenedorProductos.appendChild(tarjeta);
+  menuHtml += `</ul></li>`;
+});
+
+menuHtml += "</ul>";
+contenedorMenu.innerHTML = menuHtml;
+
+// Clic en "Todos los productos": quita cualquier filtro
+contenedorMenu.querySelector('[data-categoria="todos"]').addEventListener("click", function (evento) {
+  evento.preventDefault();
+  dibujarProductos(todosLosProductos);
+});
+
+// Clic en el nombre de una CATEGORÍA (sin subcategoría específica): filtra por toda la categoría
+contenedorMenu.querySelectorAll(".menu-item-categoria > .link-categoria").forEach(function (link) {
+  link.addEventListener("click", function (evento) {
+    evento.preventDefault();
+    const categoriaElegida = link.dataset.categoria;
+
+    const filtrados = todosLosProductos.filter(function (producto) {
+      return producto.categoria === categoriaElegida;
+    });
+
+    dibujarProductos(filtrados);
+  });
+});
+
+// Clic en una SUBCATEGORÍA: filtra por categoría Y subcategoría exacta
+contenedorMenu.querySelectorAll(".link-subcategoria").forEach(function (link) {
+  link.addEventListener("click", function (evento) {
+    evento.preventDefault();
+    evento.stopPropagation(); // evita que también se dispare el clic de la categoría padre
+
+    const categoriaElegida = link.dataset.categoria;
+    const subcategoriaElegida = link.dataset.subcategoria;
+
+    const filtrados = todosLosProductos.filter(function (producto) {
+      return producto.categoria === categoriaElegida && producto.subcategoria === subcategoriaElegida;
+    });
+
+    dibujarProductos(filtrados);
+  });
 });
 
 // Buscamos el div vacío donde vamos a mostrar el historial
