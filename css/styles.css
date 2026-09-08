@@ -1,0 +1,43 @@
+/* ==========================================
+   CSS SIMPLIFICADO - FERRETERÍA LOS MAESTROS
+   ========================================== */
+
+/* 1. Colores de la barra de navegación (Gris Oscuro) */
+.navbar {
+    background-color: #1a202c !important;
+}
+
+/* 2. Botón de buscar y botones de agregar al carro (Amarillo) */
+.btn-warning {
+    background-color: #ffc107 !important;
+    border: none !important;
+    color: #000000 !important;
+}
+
+/* Redondear los bordes del botón buscar como pc Factory */
+#btn-buscar {
+    border-radius: 0 4px 4px 0 !important;
+}
+
+/* 3. Barra secundaria de categorías (Gris Medio) */
+.bg-secondary {
+    background-color: #2d3748 !important;
+}
+
+/* 4. Tarjetas de productos: Separación y bordes limpios */
+.card {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+}
+
+/* Forzar que los títulos largos no desarmen las filas de la grilla */
+.card-title {
+    height: 45px;
+    overflow: hidden;
+}
+
+/* 5. Pie de página obligatorio (Gris Oscuro con línea amarilla arriba) */
+footer {
+    background-color: #1a202c !important;
+    border-top: 4px solid #ffc107;
+}
