@@ -90,7 +90,7 @@ function actualizarContadorNavbar() {
     }
 }
 
-// 7. Simular el procesamiento del formulario de compra
+// 7. Procesar la compra: convertir el carrito en pedidos reales
 function procesarCompra(event) {
     event.preventDefault(); // Previene que la página recargue de golpe
 
@@ -99,14 +99,58 @@ function procesarCompra(event) {
         return;
     }
 
+    // Si nadie inició sesión, lo mandamos a login. El carrito queda intacto en localStorage
+    // así que cuando vuelva a carrito.html después de loguearse, sigue todo ahí.
+    const usuarioActual = obtenerSesionActual();
+    if (!usuarioActual) {
+        alert("Debes iniciar sesión para completar tu pedido.");
+        window.location.href = "login.html";
+        return;
+    }
+
     const tipo = document.getElementById("tipoEntrega").value;
     const dir = document.getElementById("direccion").value;
 
-    alert(`¡Pedido Recibido!\nModalidad: ${tipo === 'retiro' ? 'Retiro en Tienda' : 'Despacho a Domicilio'}\nDirección registrada: ${dir}\nTu orden pasará a revisión de stock.`);
-    
-    // Vaciar carro tras la compra exitosa
-    carrito = [];
-    actualizarLocalStorage();
+    // Convertimos cada ítem del carrito en un pedido real, uno por uno
+    const itemsFallidos = [];
+
+    carrito.forEach(function (item) {
+        const resultado = hacerPedido(usuarioActual.correo, item.id, item.cantidad);
+
+        // Si falla (ej: ya no hay stock suficiente), guardamos el motivo para avisar al final
+        if (!resultado.exito) {
+            itemsFallidos.push({ nombre: item.nombre, mensaje: resultado.mensaje });
+        }
+    });
+
+    if (itemsFallidos.length === 0) {
+        // Todo se pudo pedir: vaciamos el carrito completo
+        alert(
+            `¡Pedido realizado con éxito!\n` +
+            `Modalidad: ${tipo === 'retiro' ? 'Retiro en Tienda' : 'Despacho a Domicilio'}\n` +
+            `Dirección registrada: ${dir}\n` +
+            `Puedes revisar el estado en tu historial de compras.`
+        );
+
+        carrito = [];
+        actualizarLocalStorage();
+
+        // Lo mandamos a ver su historial recién creado
+        window.location.href = "panel-cliente.html";
+    } else {
+        // Algunos productos no se pudieron pedir (ej: sin stock): dejamos solo esos en el carrito
+        const nombresFallidos = itemsFallidos.map((f) => `- ${f.nombre}: ${f.mensaje}`).join("\n");
+
+        carrito = carrito.filter(function (item) {
+            return itemsFallidos.some((f) => f.nombre === item.nombre);
+        });
+        actualizarLocalStorage();
+
+        alert(
+            `Algunos productos no se pudieron pedir y quedaron en tu carrito:\n\n${nombresFallidos}\n\n` +
+            `El resto de tu pedido sí se procesó correctamente.`
+        );
+    }
 }
 
 // Inicializar al cargar el documento HTML

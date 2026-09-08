@@ -4,57 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ferretería Los Maestros | Panel Administrador</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/estilos.css">
 </head>
-<body>
+<body class="bg-light">
 
-  <header>
-    <a href="panel-admin.html" class="logo">Ferretería Los Maestros</a>
-    <nav>
-      <ul>
-        <li><span id="correo-usuario"></span></li>
-      </ul>
+  <header class="sticky-top shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+      <div class="container gap-3">
+        <a class="navbar-brand fw-bold fs-3 text-warning" href="panel-admin.html">🛠️ LOS MAESTROS</a>
+        <div class="d-flex align-items-center gap-3 ms-auto">
+          <span id="correo-usuario" class="text-white small"></span>
+          <button id="btn-cerrar-sesion" class="btn btn-outline-warning btn-sm">Cerrar sesión</button>
+        </div>
+      </div>
     </nav>
   </header>
 
-  <main>
-    <section>
-      <h1 id="titulo-bienvenida">Panel Administrador</h1>
-      <button id="btn-cerrar-sesion">Cerrar sesión</button>
-    </section>
+  <main class="container my-5">
 
-    <section>
-      <h2>Usuarios registrados</h2>
-      <div id="lista-usuarios"></div>
-    </section>
+    <div class="card shadow-sm border-0 p-4 rounded-3 mb-4">
+      <h1 id="titulo-bienvenida" class="fw-bold mb-0">Panel Administrador</h1>
+    </div>
 
-    <section>
-      <h2>Gestión de productos</h2>
-      <div id="lista-productos-admin"></div>
+    <div class="card shadow-sm border-0 p-4 rounded-3 mb-4">
+      <h2 class="fw-bold mb-3">Usuarios registrados</h2>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>RUT</th>
+              <th>Teléfono</th>
+              <th>Rol</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="lista-usuarios">
+            <!-- panel-admin.js inyecta aquí una fila <tr> por usuario -->
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-      <h3>Agregar producto nuevo</h3>
-      <form id="form-nuevo-producto">
-        <label>Nombre: <input type="text" id="nuevo-nombre" required></label>
-        <label>Precio: <input type="number" id="nuevo-precio" min="0" required></label>
-        <label>Stock inicial: <input type="number" id="nuevo-stock" min="0" required></label>
-        <label>Imagen (ruta): <input type="text" id="nuevo-imagen" placeholder="img/nombre.jpg" required></label>
-        <label>Categoría:
-          <select id="nuevo-categoria">
+    <div class="card shadow-sm border-0 p-4 rounded-3 mb-4">
+      <h2 class="fw-bold mb-3">Gestión de productos</h2>
+      <div class="row g-4" id="lista-productos-admin">
+        <!-- panel-admin.js inyecta aquí una card editable por producto -->
+      </div>
+
+      <hr class="my-4">
+
+      <h3 class="fw-bold mb-3">Agregar producto nuevo</h3>
+      <form id="form-nuevo-producto" class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="nuevo-nombre">Nombre</label>
+          <input type="text" class="form-control" id="nuevo-nombre" required>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="nuevo-precio">Precio</label>
+          <input type="number" class="form-control" id="nuevo-precio" min="0" required>
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label" for="nuevo-stock">Stock inicial</label>
+          <input type="number" class="form-control" id="nuevo-stock" min="0" required>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="nuevo-imagen">Imagen (ruta)</label>
+          <input type="text" class="form-control" id="nuevo-imagen" placeholder="img/nombre.jpg" required>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="nuevo-categoria">Categoría</label>
+          <select id="nuevo-categoria" class="form-select">
             <option value="Herramientas manuales">Herramientas manuales</option>
             <option value="Herramientas eléctricas">Herramientas eléctricas</option>
             <option value="Materiales de construcción">Materiales de construcción</option>
           </select>
-        </label>
-        <button type="submit">Agregar producto</button>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-warning fw-bold">Agregar producto</button>
+        </div>
       </form>
-    </section>
+    </div>
+
   </main>
 
-  <footer>
-    <p>Ferretería Los Maestros — Av. Las Industrias 1234, Puente Alto, Santiago</p>
-    <p>&copy; 2026 Ferretería Los Maestros. Todos los derechos reservados.</p>
+  <footer class="bg-dark text-white py-4 mt-5" style="border-top: 4px solid #ffc107;">
+    <div class="container text-center">
+      <p class="mb-0 small">Ferretería Los Maestros — Av. Las Industrias 1234, Puente Alto, Santiago</p>
+      <p class="mb-0 small">&copy; 2026 Ferretería Los Maestros. Todos los derechos reservados.</p>
+    </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
   <script src="js/datos.js"></script>
   <script src="js/panel-admin.js"></script>
 </body>

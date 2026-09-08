@@ -15,28 +15,32 @@ document.getElementById("btn-cerrar-sesion").addEventListener("click", function 
   window.location.href = "login.html";
 });
 
-// Buscamos el div vacío donde vamos a mostrar los usuarios
-const contenedorUsuarios = document.getElementById("lista-usuarios");
+// ============================
+// USUARIOS (tabla Bootstrap)
+// ============================
 
-// Traemos todos los usuarios registrados
+const contenedorUsuarios = document.getElementById("lista-usuarios");
 const usuarios = obtenerUsuarios();
 
 usuarios.forEach(function (usuario) {
-  const fila = document.createElement("div");
+  const fila = document.createElement("tr");
 
   fila.innerHTML = `
-    <p>
-      ${usuario.nombre} — ${usuario.correo} — RUT: ${usuario.rut} — Tel: ${usuario.telefono}
-    </p>
-    <label>Rol:
-      <select class="select-rol">
+    <td>${usuario.nombre}</td>
+    <td>${usuario.correo}</td>
+    <td>${usuario.rut}</td>
+    <td>${usuario.telefono}</td>
+    <td>
+      <select class="form-select form-select-sm select-rol">
         <option value="cliente">Cliente</option>
         <option value="vendedor">Vendedor</option>
         <option value="admin">Admin</option>
       </select>
-    </label>
-    <button class="btn-actualizar-rol">Actualizar rol</button>
-    <p class="mensaje-rol"></p>
+    </td>
+    <td class="text-end">
+      <button class="btn btn-sm btn-outline-primary btn-actualizar-rol">Actualizar</button>
+      <p class="mensaje-rol small text-success mb-0 mt-1"></p>
+    </td>
   `;
 
   // Dejamos seleccionado el rol que ya tiene ese usuario
@@ -59,10 +63,11 @@ usuarios.forEach(function (usuario) {
   contenedorUsuarios.appendChild(fila);
 });
 
-// Buscamos el div vacío donde vamos a mostrar los productos
-const contenedorProductosAdmin = document.getElementById("lista-productos-admin");
+// ============================
+// PRODUCTOS (cards editables Bootstrap)
+// ============================
 
-// Traemos todos los productos guardados
+const contenedorProductosAdmin = document.getElementById("lista-productos-admin");
 const productosAdmin = obtenerProductos();
 
 // Lista de categorías disponibles (la reutilizamos para armar el <select> de cada producto)
@@ -73,33 +78,57 @@ function dibujarProductosAdmin() {
   contenedorProductosAdmin.innerHTML = ""; // limpiamos lo que hubiera antes de volver a dibujar
 
   productosAdmin.forEach(function (producto) {
-    const fila = document.createElement("div");
+    const columna = document.createElement("div");
+    columna.className = "col-12 col-md-6 col-lg-4";
 
     // Armamos las opciones del <select> de categoría dinámicamente a partir del arreglo de arriba
     const opcionesCategoria = categoriasDisponibles
       .map((cat) => `<option value="${cat}">${cat}</option>`)
       .join("");
 
-    fila.innerHTML = `
-      <img src="${producto.imagen}" alt="${producto.nombre}" width="100">
-      <label>Nombre: <input type="text" class="input-nombre" value="${producto.nombre}"></label>
-      <label>Precio: <input type="number" class="input-precio" value="${producto.precio}" min="0"></label>
-      <label>Stock: <input type="number" class="input-stock" value="${producto.stock}" min="0"></label>
-      <label>Imagen (ruta): <input type="text" class="input-imagen" value="${producto.imagen}"></label>
-      <label>Categoría: <select class="select-categoria">${opcionesCategoria}</select></label>
-      <button class="btn-guardar-producto">Guardar cambios</button>
-      <button class="btn-eliminar-producto">Eliminar producto</button>
-      <p class="mensaje-producto"></p>
+    columna.innerHTML = `
+      <div class="card h-100 shadow-sm border-1 p-3">
+        <img src="${producto.imagen}" class="rounded mb-3" alt="${producto.nombre}" style="height: 140px; object-fit: cover;">
+
+        <div class="mb-2">
+          <label class="form-label small mb-1">Nombre</label>
+          <input type="text" class="form-control form-control-sm input-nombre" value="${producto.nombre}">
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label small mb-1">Precio</label>
+            <input type="number" class="form-control form-control-sm input-precio" value="${producto.precio}" min="0">
+          </div>
+          <div class="col-6">
+            <label class="form-label small mb-1">Stock</label>
+            <input type="number" class="form-control form-control-sm input-stock" value="${producto.stock}" min="0">
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label small mb-1">Imagen (ruta)</label>
+          <input type="text" class="form-control form-control-sm input-imagen" value="${producto.imagen}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small mb-1">Categoría</label>
+          <select class="form-select form-select-sm select-categoria">${opcionesCategoria}</select>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-warning btn-sm flex-fill fw-bold btn-guardar-producto">Guardar</button>
+          <button class="btn btn-outline-danger btn-sm flex-fill btn-eliminar-producto">Eliminar</button>
+        </div>
+        <p class="mensaje-producto small text-success mt-2 mb-0"></p>
+      </div>
     `;
 
-    const inputNombre = fila.querySelector(".input-nombre");
-    const inputPrecio = fila.querySelector(".input-precio");
-    const inputStock = fila.querySelector(".input-stock");
-    const inputImagen = fila.querySelector(".input-imagen");
-    const selectCategoria = fila.querySelector(".select-categoria");
-    const botonGuardar = fila.querySelector(".btn-guardar-producto");
-    const botonEliminar = fila.querySelector(".btn-eliminar-producto");
-    const mensajeProducto = fila.querySelector(".mensaje-producto");
+    const inputNombre = columna.querySelector(".input-nombre");
+    const inputPrecio = columna.querySelector(".input-precio");
+    const inputStock = columna.querySelector(".input-stock");
+    const inputImagen = columna.querySelector(".input-imagen");
+    const selectCategoria = columna.querySelector(".select-categoria");
+    const botonGuardar = columna.querySelector(".btn-guardar-producto");
+    const botonEliminar = columna.querySelector(".btn-eliminar-producto");
+    const mensajeProducto = columna.querySelector(".mensaje-producto");
 
     // Dejamos seleccionada la categoría que el producto ya tiene
     selectCategoria.value = producto.categoria;
@@ -124,13 +153,16 @@ function dibujarProductosAdmin() {
       dibujarProductosAdmin(); // volvemos a dibujar la lista, ya sin este producto
     });
 
-    contenedorProductosAdmin.appendChild(fila);
+    contenedorProductosAdmin.appendChild(columna);
   });
 }
 
 dibujarProductosAdmin();
 
-// Buscamos el formulario de agregar producto
+// ============================
+// FORMULARIO NUEVO PRODUCTO
+// ============================
+
 const formNuevoProducto = document.getElementById("form-nuevo-producto");
 
 formNuevoProducto.addEventListener("submit", function (evento) {

@@ -4,41 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ferretería Los Maestros | Panel Vendedor</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/estilos.css">
 </head>
-<body>
+<body class="bg-light">
 
-  <header>
-    <a href="panel-vendedor.html" class="logo">Ferretería Los Maestros</a>
-    <nav>
-      <ul>
-        <li><span id="correo-usuario"></span></li>
-      </ul>
+  <header class="sticky-top shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+      <div class="container gap-3">
+        <a class="navbar-brand fw-bold fs-3 text-warning" href="panel-vendedor.html">🛠️ LOS MAESTROS</a>
+        <div class="d-flex align-items-center gap-3 ms-auto">
+          <span id="correo-usuario" class="text-white small"></span>
+          <button id="btn-cerrar-sesion" class="btn btn-outline-warning btn-sm">Cerrar sesión</button>
+        </div>
+      </div>
     </nav>
   </header>
 
-  <main>
-    <section>
-      <h1 id="titulo-bienvenida">Panel Vendedor</h1>
-      <button id="btn-cerrar-sesion">Cerrar sesión</button>
-    </section>
+  <main class="container my-5">
 
-    <section>
-      <h2>Inventario</h2>
-      <div id="lista-inventario"></div>
-    </section>
+    <div class="card shadow-sm border-0 p-4 rounded-3 mb-4">
+      <h1 id="titulo-bienvenida" class="fw-bold mb-0">Panel Vendedor</h1>
+    </div>
 
-    <section>
-      <h2>Pedidos de clientes</h2>
-      <div id="lista-pedidos-vendedor"></div>
-    </section>
+    <div class="card shadow-sm border-0 p-4 rounded-3 mb-4">
+      <h2 class="fw-bold mb-3">Inventario</h2>
+      <div class="row g-4" id="lista-inventario">
+        <!-- panel-vendedor.js inyecta aquí una card por producto -->
+      </div>
+    </div>
+
+    <div class="card shadow-sm border-0 p-4 rounded-3 mb-4">
+      <h2 class="fw-bold mb-3">Pedidos de clientes</h2>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Producto</th>
+              <th>Cant.</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="lista-pedidos-vendedor">
+            <!-- panel-vendedor.js inyecta aquí una fila <tr> por pedido -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 
-  <footer>
-    <p>Ferretería Los Maestros — Av. Las Industrias 1234, Puente Alto, Santiago</p>
-    <p>&copy; 2026 Ferretería Los Maestros. Todos los derechos reservados.</p>
+  <footer class="bg-dark text-white py-4 mt-5" style="border-top: 4px solid #ffc107;">
+    <div class="container text-center">
+      <p class="mb-0 small">Ferretería Los Maestros — Av. Las Industrias 1234, Puente Alto, Santiago</p>
+      <p class="mb-0 small">&copy; 2026 Ferretería Los Maestros. Todos los derechos reservados.</p>
+    </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
   <script src="js/datos.js"></script>
   <script src="js/panel-vendedor.js"></script>
 </body>

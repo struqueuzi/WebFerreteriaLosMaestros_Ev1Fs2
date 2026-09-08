@@ -2,53 +2,26 @@
 // LÓGICA DEL CATÁLOGO Y CARRITO (LOCALSTORAGE)
 // ==========================================
 
-// 1. Arreglo de productos simulando las referencias del negocio (Rúbrica Duoc UC)
-const productosFerreteria = [
-    { 
-        id: 1, 
-        nombre: "Cemento Polpaico Especial 25kg", 
-        precio: 4890, 
-        stock: 120, 
-        categoria: "Materiales de Construcción",
-        imagen: "assets/imgs/cemento-especial-transex-25-kg-.jpg" // Foto de obra/cemento
-    },
-    { 
-        id: 2, 
-        nombre: "Rotomartillo Eléctrico 800W", 
-        precio: 45990, 
-        stock: 8, 
-        categoria: "Herramientas Eléctricas",
-        imagen: "assets/imgs/5fb962b131194-edb82be4-f66a-4c09-9089-ed06a679c1c4-1600x1600.jpg" // Foto de herramientas
-    },
-    { 
-        id: 3, 
-        nombre: "Martillo de Carpintero 16oz", 
-        precio: 8990, 
-        stock: 14, 
-        categoria: "Herramientas Manuales",
-        imagen: "assets/imgs/martillo.jpg" // Foto de martillo/construcción
-    },
-    { 
-        id: 4, 
-        nombre: "Tubo PVC Sanitario 40mm x 3mt", 
-        precio: 3290, 
-        stock: 45, 
-        categoria: "Gasfitería",
-        imagen: "assets/imgs/tubo-pvc-u-para-alcantarillado-domiciliario-gris-3-metros.jpg" // Foto de tuberías/ingeniería
-    }
-];
+// 1. Traemos los productos REALES guardados por el admin (ya no una lista fija a mano)
+const productosFerreteria = obtenerProductos();
 
 // 2. Intentar recuperar el carrito guardado en el LocalStorage. Si no existe, parte vacío []
 let carrito = JSON.parse(localStorage.getItem("carrito_ferreteria")) || [];
 
 // 3. Función para pintar las Tarjetas (Cards) de Bootstrap en la pantalla
-function renderizarProductos() {
+// Recibe una lista de productos (puede ser todos, o un filtro por categoría/subcategoría)
+function renderizarProductos(listaProductos = productosFerreteria) {
     const contenedor = document.getElementById("contenedor-productos");
     if (!contenedor) return;
 
     contenedor.innerHTML = ""; // Limpiar antes de renderizar
 
-    productosFerreteria.forEach(producto => {
+    if (listaProductos.length === 0) {
+        contenedor.innerHTML = `<p class="text-muted">No hay productos en esta subcategoría.</p>`;
+        return;
+    }
+
+    listaProductos.forEach(producto => {
         // Estructura semántica usando grillas responsive: 1 col en celular, 2 en tablet, 4 en PC
         const cardHTML = `
             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
@@ -114,8 +87,77 @@ function actualizarContadorNavbar() {
     }
 }
 
+// ==========================================
+// MENÚ DE CATEGORÍAS Y SUBCATEGORÍAS (estilo mega-menú)
+// ==========================================
+
+function armarMenuCategorias() {
+    const contenedorMenu = document.getElementById("menu-categorias");
+    if (!contenedorMenu) return;
+
+    // Empezamos con "Todos los productos", igual que en panel-cliente
+    let menuHtml = `<li class="nav-item"><a class="nav-link text-white p-0 link-categoria" href="#" data-categoria="todos">🧱 Todos los Productos</a></li>`;
+
+    // CATEGORIAS_Y_SUBCATEGORIAS viene de datos.js
+    Object.keys(CATEGORIAS_Y_SUBCATEGORIAS).forEach(function (categoria) {
+        const subcategorias = CATEGORIAS_Y_SUBCATEGORIAS[categoria];
+
+        menuHtml += `
+            <li class="nav-item menu-item-categoria">
+                <a class="nav-link text-white p-0 link-categoria" href="#" data-categoria="${categoria}">${categoria} ▾</a>
+                <ul class="submenu-categoria">
+        `;
+
+        subcategorias.forEach(function (subcategoria) {
+            menuHtml += `<li><a class="link-subcategoria" href="#" data-categoria="${categoria}" data-subcategoria="${subcategoria}">${subcategoria}</a></li>`;
+        });
+
+        menuHtml += `</ul></li>`;
+    });
+
+    // Enlaces fijos que ya tenía tu compañero (Nosotros, Blog, Contacto)
+    menuHtml += `
+        <li class="nav-item"><a class="nav-link text-white p-0" href="nosotros.html">👷 Nosotros</a></li>
+        <li class="nav-item"><a class="nav-link text-white p-0" href="blogs.html">📰 Noticias / Blog</a></li>
+        <li class="nav-item"><a class="nav-link text-white p-0" href="contacto.html">📞 Contacto</a></li>
+    `;
+
+    contenedorMenu.innerHTML = menuHtml;
+
+    // Clic en "Todos los productos"
+    contenedorMenu.querySelector('[data-categoria="todos"]').addEventListener("click", function (evento) {
+        evento.preventDefault();
+        renderizarProductos(productosFerreteria);
+    });
+
+    // Clic en el nombre de una CATEGORÍA (sin subcategoría específica)
+    contenedorMenu.querySelectorAll(".menu-item-categoria > .link-categoria").forEach(function (link) {
+        link.addEventListener("click", function (evento) {
+            evento.preventDefault();
+            const categoriaElegida = link.dataset.categoria;
+            const filtrados = productosFerreteria.filter((p) => p.categoria === categoriaElegida);
+            renderizarProductos(filtrados);
+        });
+    });
+
+    // Clic en una SUBCATEGORÍA
+    contenedorMenu.querySelectorAll(".link-subcategoria").forEach(function (link) {
+        link.addEventListener("click", function (evento) {
+            evento.preventDefault();
+            evento.stopPropagation();
+            const categoriaElegida = link.dataset.categoria;
+            const subcategoriaElegida = link.dataset.subcategoria;
+            const filtrados = productosFerreteria.filter(
+                (p) => p.categoria === categoriaElegida && p.subcategoria === subcategoriaElegida
+            );
+            renderizarProductos(filtrados);
+        });
+    });
+}
+
 // 6. Lanzar la inicialización automáticamente cuando el navegador termine de cargar el HTML
 document.addEventListener("DOMContentLoaded", () => {
     renderizarProductos();
+    armarMenuCategorias();
     actualizarContadorNavbar();
 });
