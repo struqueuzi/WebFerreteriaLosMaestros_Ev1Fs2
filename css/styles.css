@@ -1,0 +1,58 @@
+/* ==========================================
+   ESTILOS GENERALES - FERRETERÍA LOS MAESTROS
+   ========================================== */
+
+/* 1. Navbar Principal y Encabezados */
+.navbar {
+    background-color: #1a202c !important;
+}
+
+/* 2. Botones de Acción Destacados (Amarillo Corporativo) */
+.btn-warning {
+    background-color: #ffc107 !important;
+    border: none !important;
+    color: #000000 !important;
+    font-weight: 600;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800 !important;
+    color: #000000 !important;
+}
+
+/* Redondear bordes del botón del buscador */
+#btn-buscar {
+    border-radius: 0 4px 4px 0 !important;
+}
+
+/* 3. Barra Secundaria de Navegación */
+.bg-secondary {
+    background-color: #2d3748 !important;
+}
+
+/* 4. Tarjetas y Paneles de Información */
+.card {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+}
+
+/* Normalización de títulos en grillas de productos */
+.card-title {
+    height: 45px;
+    overflow: hidden;
+}
+
+/* 5. Pie de Página Unificado */
+footer {
+    background-color: #1a202c !important;
+    border-top: 4px solid #ffc107;
+}
+
+/* Transición suave para enlaces */
+.nav-link {
+    transition: color 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+    color: #ffc107 !important;
+}
