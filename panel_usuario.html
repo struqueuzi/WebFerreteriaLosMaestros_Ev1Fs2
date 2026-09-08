@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferretería Los Maestros | Panel Cliente</title>
+
+    <link rel="icon" href="assets/imgs/329f5c6e4eaff31962d0f2cc0bd20b77.jpg" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+  <!-- HEADER Y NAV BASE -->
+  <header class="sticky-top shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+      <div class="container gap-3">
+        <a class="navbar-brand fw-bold fs-3 text-warning" href="index.html">🛠️ LOS MAESTROS</a>
+        <div class="d-flex align-items-center gap-3 ms-auto">
+          <span id="correo-usuario" class="text-white small fw-bold"></span>
+
+          <button class="btn btn-outline-warning btn-sm d-flex align-items-center gap-2" type="button"
+                  data-bs-toggle="offcanvas" data-bs-target="#offcanvasCarrito" aria-controls="offcanvasCarrito">
+            🛒 <span class="d-none d-sm-inline">Carrito</span>
+            <span id="contador-carrito" class="badge bg-danger rounded-pill">0</span>
+          </button>
+
+          <button id="btn-cerrar-sesion" class="btn btn-outline-warning btn-sm">Cerrar sesión</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="bg-secondary py-2 d-none d-md-block">
+      <div class="container">
+        <ul class="nav gap-4 small fw-bold" id="menu-categorias">
+          <!-- Categorías inyectadas dinámicamente por panel-cliente.js -->
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="container my-5 flex-grow-1">
+
+    <div class="card shadow-sm border-0 p-4 rounded-3 mb-4">
+      <h1 id="titulo-bienvenida" class="fw-bold mb-0">Bienvenido</h1>
+    </div>
+
+    <div class="card shadow-sm border-0 p-4 rounded-3 mb-4">
+      <h2 class="fw-bold mb-3">Catálogo de productos</h2>
+      <div class="row g-4" id="lista-productos"></div>
+    </div>
+
+    <div class="card shadow-sm border-0 p-4 rounded-3 mb-4">
+      <h2 class="fw-bold mb-3">Mi historial de compras</h2>
+      <div id="historial-compras"></div>
+    </div>
+
+    <div class="card shadow-sm border-0 p-4 rounded-3">
+      <h2 class="fw-bold mb-2">Cuenta corriente</h2>
+      <p class="mb-0 fs-5">Saldo pendiente: $<span id="saldo-pendiente">0</span></p>
+    </div>
+
+  </main>
+
+  <!-- CARRITO LATERAL -->
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCarrito" aria-labelledby="offcanvasCarritoLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title fw-bold" id="offcanvasCarritoLabel">🛒 Mi carrito</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column">
+
+      <div class="table-responsive mb-2">
+        <table class="table align-middle table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Cant.</th>
+              <th>Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tabla-carrito">
+            <!-- Filas dinámicas del carrito -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="carrito-vacio" class="text-center text-muted py-4 d-none">
+        Tu carrito está vacío.
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center fs-5 mt-2 mb-3">
+        <span>Total:</span>
+        <span class="fw-bold text-primary" id="total-compra">$0</span>
+      </div>
+
+      <hr>
+
+      <h6 class="fw-bold mb-2">Información de entrega</h6>
+      <form id="form-checkout-cliente">
+        <div class="mb-2">
+          <label class="form-label small" for="tipoEntregaCliente">Tipo de retiro</label>
+          <select class="form-select form-select-sm" id="tipoEntregaCliente" required>
+            <option value="retiro">Retiro en tienda</option>
+            <option value="despacho">Despacho a domicilio</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small" for="direccionCliente">Dirección</label>
+          <input type="text" class="form-control form-control-sm" id="direccionCliente" placeholder="Ej: Av. Las Industrias 1234" required>
+        </div>
+        <button type="submit" class="btn btn-warning w-100 fw-bold">Confirmar pedido</button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- FOOTER BASE -->
+  <footer class="bg-dark text-white py-4 mt-auto" style="border-top: 4px solid #ffc107;">
+    <div class="container text-center">
+      <p class="mb-0 small">Ferretería Los Maestros — Av. Las Industrias 1234, Puente Alto, Santiago</p>
+      <p class="mb-0 small">&copy; 2026 Ferretería Los Maestros. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/panel-cliente.js"></script>
+</body>
+</html>
