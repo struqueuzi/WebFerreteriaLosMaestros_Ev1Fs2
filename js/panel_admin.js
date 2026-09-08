@@ -1,5 +1,5 @@
 // ========================================================
-// panel-admin.js - GESTIÓN DE ROLES Y PRODUCTOS
+// panel_admin.js - GESTIÓN DE ROLES Y PRODUCTOS
 // ========================================================
 
 const usuarioActual = obtenerSesionActual();
@@ -9,7 +9,7 @@ if (!usuarioActual || usuarioActual.rol !== "admin") {
 }
 
 document.getElementById("correo-usuario").textContent = usuarioActual.correo;
-document.getElementById("btn-cerrar-sesion").addEventListener("click", () => {
+document.getElementById("btn-cerrar-sesion")?.addEventListener("click", () => {
   cerrarSesion();
   window.location.href = "login.html";
 });
@@ -18,42 +18,42 @@ document.getElementById("btn-cerrar-sesion").addEventListener("click", () => {
 // TABLA DE USUARIOS Y ROLES
 // --------------------------------------------------------
 const contenedorUsuarios = document.getElementById("lista-usuarios");
-const usuarios = obtenerUsuarios();
+if (contenedorUsuarios) {
+  const usuarios = obtenerUsuarios();
+  usuarios.forEach((usuario) => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${usuario.nombre}</td>
+      <td>${usuario.correo}</td>
+      <td>${usuario.rut}</td>
+      <td>${usuario.telefono}</td>
+      <td>
+        <select class="form-select form-select-sm select-rol">
+          <option value="cliente">Cliente</option>
+          <option value="vendedor">Vendedor</option>
+          <option value="admin">Admin</option>
+        </select>
+      </td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-outline-primary btn-actualizar-rol">Actualizar</button>
+        <p class="mensaje-rol small text-success mb-0 mt-1"></p>
+      </td>
+    `;
 
-usuarios.forEach((usuario) => {
-  const fila = document.createElement("tr");
+    const selectRol = fila.querySelector(".select-rol");
+    selectRol.value = usuario.rol;
 
-  fila.innerHTML = `
-    <td>${usuario.nombre}</td>
-    <td>${usuario.correo}</td>
-    <td>${usuario.rut}</td>
-    <td>${usuario.telefono}</td>
-    <td>
-      <select class="form-select form-select-sm select-rol">
-        <option value="cliente">Cliente</option>
-        <option value="vendedor">Vendedor</option>
-        <option value="admin">Admin</option>
-      </select>
-    </td>
-    <td class="text-end">
-      <button class="btn btn-sm btn-outline-primary btn-actualizar-rol">Actualizar</button>
-      <p class="mensaje-rol small text-success mb-0 mt-1"></p>
-    </td>
-  `;
+    fila.querySelector(".btn-actualizar-rol").addEventListener("click", () => {
+      usuario.rol = selectRol.value;
+      guardarUsuarios(usuarios);
+      const mensaje = fila.querySelector(".mensaje-rol");
+      mensaje.textContent = "Rol actualizado";
+      setTimeout(() => (mensaje.textContent = ""), 2000);
+    });
 
-  const selectRol = fila.querySelector(".select-rol");
-  selectRol.value = usuario.rol;
-
-  fila.querySelector(".btn-actualizar-rol").addEventListener("click", () => {
-    usuario.rol = selectRol.value;
-    guardarUsuarios(usuarios);
-    const mensaje = fila.querySelector(".mensaje-rol");
-    mensaje.textContent = "Rol actualizado";
-    setTimeout(() => (mensaje.textContent = ""), 2000);
+    contenedorUsuarios.appendChild(fila);
   });
-
-  contenedorUsuarios.appendChild(fila);
-});
+}
 
 // --------------------------------------------------------
 // ADMINISTRACIÓN DE PRODUCTOS
@@ -63,11 +63,12 @@ let productosAdmin = obtenerProductos();
 const categoriasDisponibles = Object.keys(CATEGORIAS_Y_SUBCATEGORIAS);
 
 function dibujarProductosAdmin() {
+  if (!contenedorProductosAdmin) return;
   contenedorProductosAdmin.innerHTML = "";
 
   productosAdmin.forEach((producto) => {
     const columna = document.createElement("div");
-    columna.className = "col-12 col-md-6 col-lg-4";
+    columna.className = "col-12 col-md-6 col-lg-4 mb-3";
 
     const opcionesCat = categoriasDisponibles
       .map((c) => `<option value="${c}">${c}</option>`)
@@ -134,7 +135,7 @@ function dibujarProductosAdmin() {
 
 dibujarProductosAdmin();
 
-// Formulario Nuevo Producto
+// Formulario de creación
 const formNuevo = document.getElementById("form-nuevo-producto");
 if (formNuevo) {
   formNuevo.addEventListener("submit", (e) => {
@@ -145,7 +146,7 @@ if (formNuevo) {
       nombre: document.getElementById("nuevo-nombre").value,
       precio: parseInt(document.getElementById("nuevo-precio").value, 10),
       stock: parseInt(document.getElementById("nuevo-stock").value, 10),
-      imagen: document.getElementById("nuevo-imagen").value,
+      imagen: document.getElementById("nuevo-imagen").value || "assets/imgs/cemento-especial-transex-25-kg-.jpg",
       categoria: document.getElementById("nuevo-categoria").value,
       subcategoria: "General"
     };

@@ -145,15 +145,12 @@ function inicializarProductos() {
   const productosExistentes = obtenerProductos();
   if (productosExistentes.length > 0) return;
 
+  // Estandarización de rutas a assets/imgs/
   const productosDeEjemplo = [
-    { id: 1, nombre: "Martillo de acero 16 oz", precio: 6990, stock: 25, imagen: "img/martillo.jpg", categoria: "Herramientas manuales", subcategoria: "Martillos" },
-    { id: 2, nombre: "Taladro percutor 18V", precio: 54990, stock: 10, imagen: "img/taladro.jpg", categoria: "Herramientas eléctricas", subcategoria: "Taladros" },
-    { id: 3, nombre: "Set de llaves (12 pzas)", precio: 18490, stock: 15, imagen: "img/llaves.jpg", categoria: "Herramientas manuales", subcategoria: "Llaves" },
-    { id: 4, nombre: "Escalera aluminio 6 peldaños", precio: 32990, stock: 8, imagen: "img/escalera.jpg", categoria: "Herramientas manuales", subcategoria: "Escaleras" },
-    { id: 5, nombre: "Pintura látex 1 galón", precio: 14990, stock: 30, imagen: "img/pintura.jpg", categoria: "Materiales de construcción", subcategoria: "Pinturas" },
-    { id: 6, nombre: "Caja tornillos autoperforantes", precio: 4490, stock: 50, imagen: "img/tornillos.jpg", categoria: "Materiales de construcción", subcategoria: "Tornillos y anclajes" },
-    { id: 7, nombre: "Cemento Polpaico Especial 25kg", precio: 4890, stock: 120, imagen: "img/cemento.jpg", categoria: "Materiales de construcción", subcategoria: "Cementos" },
-    { id: 8, nombre: "Tubo PVC Sanitario 40mm x 3mt", precio: 3290, stock: 45, imagen: "img/tubo-pvc.webp", categoria: "Gasfitería", subcategoria: "Tuberías PVC" }
+    { id: 1, nombre: "Cemento Polpaico Especial 25kg", precio: 4890, stock: 120, imagen: "assets/imgs/cemento-especial-transex-25-kg-.jpg", categoria: "Materiales de construcción", subcategoria: "Cementos" },
+    { id: 2, nombre: "Rotomartillo Eléctrico 800W", precio: 45990, stock: 8, imagen: "assets/imgs/5fb962b131194-edb82be4-f66a-4c09-9089-ed06a679c1c4-1600x1600.jpg", categoria: "Herramientas eléctricas", subcategoria: "Rotomartillos" },
+    { id: 3, nombre: "Martillo de Carpintero 16oz", precio: 8990, stock: 14, imagen: "assets/imgs/martillo.jpg", categoria: "Herramientas manuales", subcategoria: "Martillos" },
+    { id: 4, nombre: "Tubo PVC Sanitario 40mm x 3mt", precio: 3290, stock: 45, imagen: "assets/imgs/tubo-pvc-u-para-alcantarillado-domiciliario-gris-3-metros.jpg", categoria: "Gasfitería", subcategoria: "Tuberías PVC" }
   ];
 
   guardarProductos(productosDeEjemplo);
@@ -177,6 +174,34 @@ function vaciarCarrito() {
   actualizarContadorCarritoGlobal();
 }
 
+function agregarAlCarritoGlobal(id, cantidad = 1) {
+  const productos = obtenerProductos();
+  const producto = productos.find((p) => p.id === id);
+  if (!producto) return { exito: false, mensaje: "El producto no existe." };
+
+  let carrito = obtenerCarrito();
+  const itemExistente = carrito.find((item) => item.id === id);
+
+  const cantidadActual = itemExistente ? itemExistente.cantidad : 0;
+  if (cantidadActual + cantidad > producto.stock) {
+    return { exito: false, mensaje: `Stock insuficiente. Disponible: ${producto.stock}` };
+  }
+
+  if (itemExistente) {
+    itemExistente.cantidad += cantidad;
+  } else {
+    carrito.push({
+      id: producto.id,
+      nombre: producto.nombre,
+      precio: producto.precio,
+      cantidad: cantidad
+    });
+  }
+
+  guardarCarrito(carrito);
+  return { exito: true, mensaje: `¡${producto.nombre} agregado al carrito!` };
+}
+
 function actualizarContadorCarritoGlobal() {
   const contador = document.getElementById("contador-carrito");
   if (contador) {
@@ -187,7 +212,7 @@ function actualizarContadorCarritoGlobal() {
 }
 
 // --------------------------------------------------------
-// 4. PEDIDOS
+// 4. PEDIDOS Y REBAJA DE STOCK
 // --------------------------------------------------------
 function obtenerPedidos() {
   const datos = localStorage.getItem("pedidos");
@@ -207,7 +232,7 @@ function hacerPedido(clienteCorreo, productoId, cantidad) {
   }
 
   if (producto.stock < cantidad) {
-    return { exito: false, mensaje: `Stock insuficiente (Disponible: ${producto.stock}).` };
+    return { exito: false, mensaje: `Stock insuficiente de "${producto.nombre}" (Disponible: ${producto.stock}).` };
   }
 
   producto.stock -= cantidad;
@@ -231,6 +256,9 @@ function hacerPedido(clienteCorreo, productoId, cantidad) {
   return { exito: true, mensaje: "Pedido realizado con éxito.", pedido: nuevoPedido };
 }
 
-// Inicializaciones automáticas al cargar la librería
-inicializarAdmin();
-inicializarProductos();
+// Inicialización automática al cargar scripts
+document.addEventListener("DOMContentLoaded", () => {
+  inicializarAdmin();
+  inicializarProductos();
+  actualizarContadorCarritoGlobal();
+});

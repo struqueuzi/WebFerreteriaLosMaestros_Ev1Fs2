@@ -1,113 +1,101 @@
 // ==========================================
-// LÓGICA DE CONTROL DEL CARRITO DE COMPRAS
+// LÓGICA DE VISTA DE CARRITO DE COMPRAS
 // ==========================================
 
-// 1. Recuperar el arreglo del localStorage
-let carrito = JSON.parse(localStorage.getItem("carrito_ferreteria")) || [];
-
-// 2. Renderizar la tabla de productos inmediatamente al cargar
 function renderizarTablaCarrito() {
-    const tabla = document.getElementById("tabla-carrito");
-    const contenedorVacio = document.getElementById("carrito-vacio");
-    const totalTexto = document.getElementById("total-compra");
+  const tabla = document.getElementById("tabla-carrito");
+  const contenedorVacio = document.getElementById("carrito-vacio");
+  const totalTexto = document.getElementById("total-compra");
 
-    if (!tabla) return;
+  if (!tabla) return;
 
-    // Si el carro no tiene elementos
-    if (carrito.length === 0) {
-        tabla.innerHTML = "";
-        contenedorVacio.classList.remove("d-none");
-        totalTexto.innerText = "$0";
-        actualizarContadorNavbar();
-        return;
-    }
+  const carrito = obtenerCarrito();
 
-    // Si tiene elementos, ocultamos el mensaje de vacío
-    contenedorVacio.classList.add("d-none");
+  if (carrito.length === 0) {
     tabla.innerHTML = "";
-    let totalAcumulado = 0;
+    if (contenedorVacio) contenedorVacio.classList.remove("d-none");
+    if (totalTexto) totalTexto.innerText = "$0";
+    actualizarContadorCarritoGlobal();
+    return;
+  }
 
-    carrito.forEach((item, index) => {
-        const subtotal = item.precio * item.cantidad;
-        totalAcumulado += subtotal;
+  if (contenedorVacio) contenedorVacio.classList.add("d-none");
+  tabla.innerHTML = "";
+  let totalAcumulado = 0;
 
-        const filaHTML = `
-            <tr>
-                <td><span class="fw-bold text-dark">${item.nombre}</span></td>
-                <td>$${item.precio.toLocaleString('es-CL')}</td>
-                <td>
-                    <div class="input-group input-group-sm">
-                        <button class="btn btn-outline-secondary" type="button" onclick="cambiarCantidad(${index}, -1)">-</button>
-                        <input type="text" class="form-control text-center bg-white text-dark" value="${item.cantidad}" readonly style="max-width: 45px;">
-                        <button class="btn btn-outline-secondary" type="button" onclick="cambiarCantidad(${index}, 1)">+</button>
-                    </div>
-                </td>
-                <td class="fw-bold text-dark">$${subtotal.toLocaleString('es-CL')}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${index})">🗑️</button>
-                </td>
-            </tr>
-        `;
-        tabla.innerHTML += filaHTML;
-    });
+  carrito.forEach((item, index) => {
+    const subtotal = item.precio * item.cantidad;
+    totalAcumulado += subtotal;
 
-    // Actualizar el valor total general en el resumen
-    totalTexto.innerText = `$${totalAcumulado.toLocaleString('es-CL')}`;
-    actualizarContadorNavbar();
+    const filaHTML = `
+      <tr>
+        <td><span class="fw-bold text-dark">${item.nombre}</span></td>
+        <td>$${item.precio.toLocaleString("es-CL")}</td>
+        <td>
+          <div class="input-group input-group-sm" style="max-width: 110px;">
+            <button class="btn btn-outline-secondary" type="button" onclick="cambiarCantidadCarrito(${index}, -1)">-</button>
+            <input type="text" class="form-control text-center bg-white text-dark" value="${item.cantidad}" readonly>
+            <button class="btn btn-outline-secondary" type="button" onclick="cambiarCantidadCarrito(${index}, 1)">+</button>
+          </div>
+        </td>
+        <td class="fw-bold text-dark">$${subtotal.toLocaleString("es-CL")}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-danger" onclick="eliminarProductoCarrito(${index})">🗑️</button>
+        </td>
+      </tr>
+    `;
+    tabla.innerHTML += filaHTML;
+  });
+
+  if (totalTexto) totalTexto.innerText = `$${totalAcumulado.toLocaleString("es-CL")}`;
+  actualizarContadorCarritoGlobal();
 }
 
-// 3. Función para incrementar o decrementar cantidades (+ / -)
-function cambiarCantidad(index, cambio) {
-    carrito[index].cantidad += cambio;
+function cambiarCantidadCarrito(index, cambio) {
+  let carrito = obtenerCarrito();
+  carrito[index].cantidad += cambio;
 
-    // Si la cantidad llega a 0, eliminamos el ítem por completo
-    if (carrito[index].cantidad <= 0) {
-        eliminarProducto(index);
-        return;
-    }
+  if (carrito[index].cantidad <= 0) {
+    carrito.splice(index, 1);
+  }
 
-    actualizarLocalStorage();
+  guardarCarrito(carrito);
+  renderizarTablaCarrito();
 }
 
-// 4. Función para remover una fila completa (Basurero)
-function eliminarProducto(index) {
-    carrito.splice(index, 1); // Quita el elemento del arreglo
-    actualizarLocalStorage();
+function eliminarProductoCarrito(index) {
+  let carrito = obtenerCarrito();
+  carrito.splice(index, 1);
+  guardarCarrito(carrito);
+  renderizarTablaCarrito();
 }
 
-// 5. Centralizar guardado en el navegador y refresco de pantalla
-function actualizarLocalStorage() {
-    localStorage.setItem("carrito_ferreteria", JSON.stringify(carrito));
-    renderizarTablaCarrito();
-}
-
-// 6. Sincronizar el contador del menú superior
-function actualizarContadorNavbar() {
-    const contador = document.getElementById("contador-carrito");
-    if (contador) {
-        const totalItems = carrito.reduce((suma, item) => suma + item.cantidad, 0);
-        contador.innerText = totalItems;
-    }
-}
-
-// 7. Simular el procesamiento del formulario de compra
 function procesarCompra(event) {
-    event.preventDefault(); // Previene que la página recargue de golpe
+  event.preventDefault();
+  const carrito = obtenerCarrito();
 
-    if (carrito.length === 0) {
-        alert("Tu carrito está vacío. Agrega productos en el catálogo antes de pagar.");
-        return;
-    }
+  if (carrito.length === 0) {
+    alert("Tu carrito está vacío. Agrega productos antes de realizar la compra.");
+    return;
+  }
 
-    const tipo = document.getElementById("tipoEntrega").value;
-    const dir = document.getElementById("direccion").value;
+  const sesion = obtenerSesionActual();
+  const correoCliente = sesion ? sesion.correo : "invitado@ferreteria.cl";
 
-    alert(`¡Pedido Recibido!\nModalidad: ${tipo === 'retiro' ? 'Retiro en Tienda' : 'Despacho a Domicilio'}\nDirección registrada: ${dir}\nTu orden pasará a revisión de stock.`);
-    
-    // Vaciar carro tras la compra exitosa
-    carrito = [];
-    actualizarLocalStorage();
+  const fallidos = [];
+  carrito.forEach((item) => {
+    const res = hacerPedido(correoCliente, item.id, item.cantidad);
+    if (!res.exito) fallidos.push(`${item.nombre}: ${res.mensaje}`);
+  });
+
+  if (fallidos.length === 0) {
+    alert("¡Pedido realizado con éxito! Tu orden pasará a revisión de stock.");
+    vaciarCarrito();
+    renderizarTablaCarrito();
+  } else {
+    alert(`Algunos productos no se completaron por falta de stock:\n\n${fallidos.join("\n")}`);
+    renderizarTablaCarrito();
+  }
 }
 
-// Inicializar al cargar el documento HTML
 document.addEventListener("DOMContentLoaded", renderizarTablaCarrito);

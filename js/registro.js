@@ -18,7 +18,7 @@ if (formRegistro) {
       alert(res.mensaje);
       formRegistro.reset();
       window.location.href = "login.html";
-    } else {
+    } else if (mensajeErrorRegistro) {
       mensajeErrorRegistro.textContent = res.mensaje;
     }
   });
