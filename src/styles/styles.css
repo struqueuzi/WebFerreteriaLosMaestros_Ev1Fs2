@@ -1,0 +1,87 @@
+/* ==========================================
+   ESTILOS GENERALES - FERRETERÍA LOS MAESTROS
+   (se suman a Bootstrap 5: el diseño responsivo sale de Bootstrap)
+   ========================================== */
+
+/* 1. Navbar principal */
+.navbar { background-color: #1a202c !important; }
+
+/* 2. Botones de acción destacados (amarillo corporativo) */
+.btn-warning {
+  background-color: #ffc107 !important;
+  border: none !important;
+  color: #000000 !important;
+  font-weight: 600;
+}
+.btn-warning:hover { background-color: #e0a800 !important; color: #000000 !important; }
+
+/* 3. Barra secundaria de navegación */
+.bg-secondary { background-color: #2d3748 !important; }
+
+/* 4. Tarjetas y paneles */
+.card { border: 1px solid #e2e8f0 !important; border-radius: 8px !important; }
+.card-title { height: 45px; overflow: hidden; }
+
+/* 5. Pie de página */
+footer { background-color: #1a202c !important; border-top: 4px solid #ffc107; }
+
+.nav-link { transition: color 0.2s ease-in-out; }
+.navbar .nav-link:hover,
+.bg-secondary .nav-link:hover { color: #ffc107 !important; }
+
+/* ==========================================
+   MENÚ DE CATEGORÍAS (Categoría → Subcategoría)
+   Mouse: se abre con hover. Pantalla táctil: se abre con clic (clase "abierto", que pone React)
+   ========================================== */
+#menu-categorias .nav-link { cursor: pointer; }
+#menu-categorias .nav-link:hover { color: #ffc107 !important; }
+.menu-item-categoria { position: relative; }
+
+.submenu-categoria {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 220px;
+  margin: 0;
+  padding: 0.5rem 0;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  z-index: 1030;
+}
+.submenu-categoria button {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 1rem;
+  color: #1a202c;
+  font-weight: 500;
+  text-align: left;
+  background: none;
+  border: 0;
+}
+.submenu-categoria button:hover { background: #fff3cd; }
+
+.menu-item-categoria.abierto > .submenu-categoria { display: block; }
+
+@media (hover: hover) and (min-width: 768px) {
+  .menu-item-categoria:hover > .submenu-categoria { display: block; }
+}
+
+/* En celulares el submenú se despliega dentro del flujo (no flotando) para no salirse de la pantalla */
+@media (max-width: 767.98px) {
+  #menu-categorias { gap: 0.75rem 1.25rem !important; }
+  .menu-item-categoria { position: static; }
+  .submenu-categoria { position: static; width: 100%; margin-top: 0.4rem; box-shadow: none; }
+}
+
+.navbar-brand { white-space: normal; }
+
+/* Ajustes responsivos: evitan el scroll horizontal en celular y tablet */
+.table-responsive { position: relative; }
+.card .badge.bg-light { white-space: normal; text-align: left; max-width: 100%; }
+
+/* Ventana (modal) controlada por React */
+.modal.mostrar { display: block; background: rgba(0, 0, 0, 0.5); }
