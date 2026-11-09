@@ -218,9 +218,66 @@ export function cupoDisponible(usuario) {
   return Math.max(0, (usuario.cupoCuentaCorriente || 0) - (usuario.saldoPendiente || 0));
 }
 
-// Un movimiento es una línea del "estado de cuenta": compra (+), abono (-) o ajuste (+/-)
-export function crearMovimientoCC(tipo, monto, detalle) {
-  return { fecha: new Date().toLocaleString("es-CL"), tipo, monto, detalle };
+// Con qué pagó el cliente cada abono a su cuenta corriente
+export const MEDIOS_DE_PAGO = {
+  efectivo: "Efectivo",
+  debito: "Tarjeta de débito",
+  credito: "Tarjeta de crédito",
+  transferencia: "Transferencia"
+};
+
+export function nombreMedio(medio) {
+  return MEDIOS_DE_PAGO[medio] || "";
+}
+
+// Un movimiento es una línea del "estado de cuenta": compra (+), abono (-) o ajuste (+/-).
+// Los abonos guardan además el medio con que se pagaron (efectivo, débito, crédito o transferencia).
+export function crearMovimientoCC(tipo, monto, detalle, medio = null) {
+  const mov = { fecha: new Date().toLocaleString("es-CL"), fechaISO: new Date().toISOString(), tipo, monto, detalle };
+  if (medio) mov.medio = medio;
+  return mov;
+}
+
+// Estado de cuenta tipo cartola: cada movimiento con su cargo, su abono y el saldo que quedó.
+// Devuelve la lista del más antiguo al más nuevo.
+export function cartolaCuentaCorriente(usuario) {
+  const movimientos = usuario.movimientosCC || [];
+  const suma = movimientos.reduce((s, m) => s + m.monto, 0);
+  // Si el saldo guardado no calza con la suma (datos viejos), la diferencia va como "saldo anterior"
+  let saldo = (usuario.saldoPendiente || 0) - suma;
+  const lineas = [];
+  if (saldo !== 0) {
+    lineas.push({ fecha: "", tipo: "anterior", detalle: "Saldo anterior", medio: null, cargo: 0, abono: 0, saldo });
+  }
+  movimientos.forEach((m, i) => {
+    saldo += m.monto;
+    lineas.push({
+      id: i,
+      fecha: m.fecha,
+      tipo: m.tipo,
+      detalle: m.detalle,
+      medio: m.tipo === "abono" ? (m.medio || "sin_dato") : null,
+      cargo: m.monto > 0 ? m.monto : 0,
+      abono: m.monto < 0 ? -m.monto : 0,
+      saldo
+    });
+  });
+  return lineas;
+}
+
+// Totales para el resumen: cuánto se cargó, cuánto se abonó y cuánto se pagó con cada medio
+export function resumenCuentaCorriente(usuario) {
+  const lineas = cartolaCuentaCorriente(usuario);
+  const porMedio = { efectivo: 0, debito: 0, credito: 0, transferencia: 0, sin_dato: 0 };
+  lineas.forEach((l) => {
+    if (l.abono > 0) porMedio[l.medio] = (porMedio[l.medio] || 0) + l.abono;
+  });
+  return {
+    totalCargos: lineas.reduce((s, l) => s + l.cargo, 0),
+    totalAbonos: lineas.reduce((s, l) => s + l.abono, 0),
+    cantidadMovimientos: lineas.filter((l) => l.tipo !== "anterior").length,
+    porMedio
+  };
 }
 
 export function movimientosIniciales(saldo) {
@@ -228,7 +285,7 @@ export function movimientosIniciales(saldo) {
 }
 
 // Baja el saldo pendiente. Se llama cuando el administrador APRUEBA un abono enviado por el cliente.
-export function registrarAbono(idUsuario, monto, detalle = "") {
+export function registrarAbono(idUsuario, monto, detalle = "", medio = "efectivo") {
   const usuarios = obtenerUsuarios();
   const usuario = usuarios.find((u) => u.id === idUsuario);
   if (!usuario || !usuario.cuentaCorriente) return { exito: false, mensaje: "El usuario no tiene cuenta corriente." };
@@ -241,7 +298,7 @@ export function registrarAbono(idUsuario, monto, detalle = "") {
 
   usuario.saldoPendiente -= m;
   usuario.movimientosCC = usuario.movimientosCC || [];
-  usuario.movimientosCC.push(crearMovimientoCC("abono", -m, detalle.trim() || "Abono registrado en tienda"));
+  usuario.movimientosCC.push(crearMovimientoCC("abono", -m, detalle.trim() || `Abono en ${nombreMedio(medio).toLowerCase() || "tienda"}`, MEDIOS_DE_PAGO[medio] ? medio : "efectivo"));
   guardarUsuarios(usuarios);
 
   return { exito: true, mensaje: `Abono de ${formatoPesos(m)} registrado. Saldo pendiente: ${formatoPesos(usuario.saldoPendiente)}.` };
@@ -265,9 +322,10 @@ export function totalAbonosPendientes(idUsuario) {
 }
 
 // El cliente envía un abono: queda "Pendiente" y NO baja el saldo hasta que el administrador lo apruebe
-export function solicitarAbono(idUsuario, monto, detalle = "") {
+export function solicitarAbono(idUsuario, monto, detalle = "", medio = "efectivo") {
   const usuario = obtenerUsuarios().find((u) => u.id === idUsuario);
   if (!usuario || !usuario.cuentaCorriente) return { exito: false, mensaje: "No tienes cuenta corriente." };
+  if (!MEDIOS_DE_PAGO[medio]) return { exito: false, mensaje: "Elige con qué pagaste: efectivo, débito, crédito o transferencia." };
 
   const m = Number(monto);
   if (!Number.isInteger(m) || m <= 0) return { exito: false, mensaje: "Ingresa un monto entero mayor a 0." };
@@ -285,10 +343,10 @@ export function solicitarAbono(idUsuario, monto, detalle = "") {
   const abonos = obtenerAbonos();
   abonos.push({
     id: Date.now() + abonos.length, idUsuario: usuario.id, nombre: usuario.nombre, correo: usuario.correo,
-    monto: m, detalle: detalle.trim(), fecha: new Date().toLocaleString("es-CL"), estado: "Pendiente"
+    monto: m, medio, detalle: detalle.trim(), fecha: new Date().toLocaleString("es-CL"), estado: "Pendiente"
   });
   guardarAbonos(abonos);
-  return { exito: true, mensaje: `Abono de ${formatoPesos(m)} enviado. Quedará pendiente hasta que el administrador lo confirme.` };
+  return { exito: true, mensaje: `Abono de ${formatoPesos(m)} (${nombreMedio(medio).toLowerCase()}) enviado. Quedará pendiente hasta que el administrador lo confirme.` };
 }
 
 // El administrador aprueba (descuenta del saldo) o rechaza una solicitud de abono
@@ -298,7 +356,7 @@ export function resolverAbono(idAbono, aprobar) {
   if (!abono || abono.estado !== "Pendiente") return { exito: false, mensaje: "Este abono ya fue resuelto." };
 
   if (aprobar) {
-    const res = registrarAbono(abono.idUsuario, abono.monto, abono.detalle || "Abono del cliente (aprobado por el administrador)");
+    const res = registrarAbono(abono.idUsuario, abono.monto, abono.detalle || `Abono en ${nombreMedio(abono.medio || "efectivo").toLowerCase()}`, abono.medio || "efectivo");
     if (!res.exito) return res;
     abono.estado = "Aprobado";
   } else {

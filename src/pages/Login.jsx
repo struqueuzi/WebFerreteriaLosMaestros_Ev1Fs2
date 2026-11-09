@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import CampoFormulario from "../components/CampoFormulario";
+import Logo from "../components/Logo";
 import PiePagina from "../components/PiePagina";
 import { useFormulario } from "../hooks/useFormulario";
 import { iniciarSesion, rutaPanelPorRol } from "../lib/usuarios";
@@ -37,13 +38,13 @@ export default function Login() {
 
   return (
     <>
-      <header className="sticky-top shadow-sm">
-        <nav className="navbar navbar-dark bg-dark py-3">
+      <header className="sticky-top encabezado">
+        <nav className="navbar navbar-dark">
           <div className="container gap-3">
-            <Link className="navbar-brand fw-bold fs-3 text-warning" to="/">🛠️ LOS MAESTROS</Link>
+            <Logo />
             <div className="d-flex align-items-center gap-3">
               <Link to="/" className="text-white text-decoration-none small">← Volver a la tienda</Link>
-              <Link to="/registro" className="btn btn-outline-warning btn-sm">Crear cuenta</Link>
+              <Link to="/registro" className="btn btn-contorno btn-sm">Crear cuenta</Link>
             </div>
           </div>
         </nav>
@@ -69,7 +70,7 @@ export default function Login() {
               <p className="text-center mt-3 mb-0">¿No tienes cuenta? <Link to="/registro" className="fw-bold">Regístrate aquí</Link></p>
             </div>
 
-            <div className="card border-0 bg-white shadow-sm p-3 mt-3 small">
+            <div className="card p-3 mt-3 small">
               <strong className="mb-2">Cuentas de prueba</strong>
               <div><span className="badge bg-secondary">Cliente</span> cliente@maestros.cl · cliente123</div>
               <div><span className="badge bg-secondary">Vendedor</span> vendedor@maestros.cl · vendedor123</div>

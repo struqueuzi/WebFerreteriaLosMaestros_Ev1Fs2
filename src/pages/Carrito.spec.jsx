@@ -67,4 +67,23 @@ describe("Página Carrito", () => {
     expect(obtenerPedidos().length).toBe(1);
     expect(obtenerUsuarios().find((u) => u.correo === "cliente@maestros.cl").saldoPendiente).toBe(23990);
   });
+
+  it("al elegir transferencia muestra la cuenta y el monto a transferir", () => {
+    agregarAlCarrito(3, 1);
+    const vista = montar(<Carrito />);
+    expect(vista.querySelector("[data-testid=datos-transferencia]")).toBeNull();
+    elegir(vista.querySelector("#formaPago"), "transferencia");
+    expect(vista.querySelector("[data-testid=datos-transferencia]").textContent).toContain("29870014563");
+    expect(vista.querySelector("[data-testid=monto-transferencia]").textContent).toBe("$8.990");
+  });
+
+  it("al confirmar con transferencia queda el pedido y se muestra el número para el comentario", () => {
+    iniciarSesion("cliente@maestros.cl", "cliente123");
+    agregarAlCarrito(3, 1);
+    const vista = montar(<Carrito />);
+    elegir(vista.querySelector("#formaPago"), "transferencia");
+    enviarFormulario(vista.querySelector("form"));
+    expect(obtenerPedidos()[0].formaPago).toBe("transferencia");
+    expect(vista.textContent).toContain("Pedido N° 1001 registrado");
+  });
 });

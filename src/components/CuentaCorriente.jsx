@@ -1,18 +1,21 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { EtiquetaMedio } from "./CartolaCuentaCorriente";
 import CampoFormulario from "./CampoFormulario";
 import ModalBase from "./ModalBase";
 import { useAviso } from "../context/AvisoContext";
 import { useAlmacen } from "../hooks/useAlmacen";
 import { useFormulario } from "../hooks/useFormulario";
 import { formatoPesos } from "../lib/formato";
-import { cupoDisponible, obtenerAbonos, solicitarAbono, totalAbonosPendientes } from "../lib/usuarios";
+import { cartolaCuentaCorriente, cupoDisponible, MEDIOS_DE_PAGO, obtenerAbonos, solicitarAbono, totalAbonosPendientes } from "../lib/usuarios";
 import { mensajeErrorMontoEntero } from "../lib/validaciones";
 
 const COLOR_ABONO = { "Pendiente": "bg-warning text-dark", "Aprobado": "bg-success", "Rechazado": "bg-danger" };
 
 // Tarjeta de cuenta corriente del cliente: saldo, cupo, barra de uso, movimientos y botón para abonar.
-// El abono queda "Pendiente" hasta que el administrador lo aprueba. Prop: usuario (con cuenta corriente).
-export default function CuentaCorriente({ usuario }) {
+// El abono queda "Pendiente" hasta que el administrador lo aprueba.
+// Props: usuario (con cuenta corriente), conEnlace (muestra el enlace al estado de cuenta completo)
+export default function CuentaCorriente({ usuario, conEnlace = true }) {
   useAlmacen();
   const { mostrarAviso } = useAviso();
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -21,7 +24,7 @@ export default function CuentaCorriente({ usuario }) {
   const saldo = usuario.saldoPendiente || 0;
   const usado = cupo > 0 ? Math.min(100, Math.round((saldo / cupo) * 100)) : 0;
   const maximoAbono = saldo - totalAbonosPendientes(usuario.id);
-  const movimientos = [...(usuario.movimientosCC || [])].reverse().slice(0, 8);
+  const movimientos = cartolaCuentaCorriente(usuario).filter((l) => l.tipo !== "anterior").reverse().slice(0, 4);
   const misAbonos = obtenerAbonos().filter((a) => a.idUsuario === usuario.id).reverse().slice(0, 4);
 
   const reglas = {
@@ -29,7 +32,7 @@ export default function CuentaCorriente({ usuario }) {
       mensajeErrorMontoEntero(v.monto) ||
       (Number(v.monto) > maximoAbono ? `El abono no puede superar ${formatoPesos(maximoAbono)} (tu saldo menos abonos pendientes).` : "")
   };
-  const form = useFormulario({ monto: "", detalle: "" }, reglas);
+  const form = useFormulario({ monto: "", detalle: "", medio: "efectivo" }, reglas);
 
   const abrir = () => {
     if (saldo <= 0) {
@@ -47,13 +50,13 @@ export default function CuentaCorriente({ usuario }) {
   const enviar = (e) => {
     e.preventDefault();
     if (!form.validarTodo()) return;
-    const res = solicitarAbono(usuario.id, form.valores.monto, form.valores.detalle);
+    const res = solicitarAbono(usuario.id, form.valores.monto, form.valores.detalle, form.valores.medio);
     mostrarAviso(res.mensaje, res.exito);
     if (res.exito) setModalAbierto(false);
   };
 
   return (
-    <div className="card shadow-sm border-0 p-4 rounded-3 h-100 border-start border-warning border-4">
+    <div className="card p-4 h-100 tarjeta-cuenta-corriente">
       <div className="small text-muted mb-2">💳 Cuenta corriente</div>
       <div className="d-flex justify-content-between align-items-end flex-wrap gap-2">
         <div>
@@ -77,28 +80,29 @@ export default function CuentaCorriente({ usuario }) {
           <div className="fw-bold mb-1">Mis abonos enviados</div>
           {misAbonos.map((a) => (
             <div key={a.id} className="d-flex justify-content-between align-items-center border-bottom py-1 gap-2">
-              <span>{a.fecha}</span>
-              <span><strong>{formatoPesos(a.monto)}</strong> <span className={`badge ${COLOR_ABONO[a.estado] || "bg-secondary"}`}>{a.estado}</span></span>
+              <span>{a.fecha}<div><EtiquetaMedio medio={a.medio || "sin_dato"} /></div></span>
+              <span className="text-nowrap"><strong>{formatoPesos(a.monto)}</strong> <span className={`badge ${COLOR_ABONO[a.estado] || "bg-secondary"}`}>{a.estado}</span></span>
             </div>
           ))}
         </div>
       )}
 
-      <details className="mt-3">
-        <summary className="small fw-bold">Ver movimientos de mi cuenta</summary>
-        <div className="small mt-2">
-          {movimientos.length === 0 ? (
-            <span className="text-muted">Sin movimientos todavía.</span>
-          ) : (
-            movimientos.map((m, i) => (
-              <div key={i} className="d-flex justify-content-between border-bottom py-1 gap-2">
-                <span>{m.fecha} · {m.detalle}</span>
-                <strong className={m.monto < 0 ? "text-success" : "text-danger"}>{m.monto < 0 ? "−" : "+"}{formatoPesos(Math.abs(m.monto))}</strong>
-              </div>
-            ))
-          )}
-        </div>
-      </details>
+      {conEnlace && (
+      <div className="mt-3 small">
+        <div className="fw-bold mb-1">Últimos movimientos</div>
+        {movimientos.length === 0 ? (
+          <span className="text-muted">Sin movimientos todavía.</span>
+        ) : (
+          movimientos.map((m) => (
+            <div key={m.id} className="d-flex justify-content-between align-items-center border-bottom py-1 gap-2">
+              <span>{m.detalle}<div><EtiquetaMedio medio={m.medio} /></div></span>
+              <strong className={m.abono ? "text-success" : "text-danger"}>{m.abono ? "−" : "+"}{formatoPesos(m.abono || m.cargo)}</strong>
+            </div>
+          ))
+        )}
+        <Link to="/cliente/cuenta" className="link-neon mt-2" id="ver-estado-cuenta">Ver estado de cuenta completo →</Link>
+      </div>
+      )}
 
       <ModalBase
         abierto={modalAbierto}
@@ -108,15 +112,21 @@ export default function CuentaCorriente({ usuario }) {
         onSubmit={enviar}
         pie={
           <>
-            <button type="button" className="btn btn-outline-secondary" onClick={() => setModalAbierto(false)}>Cancelar</button>
+            <button type="button" className="btn btn-contorno" onClick={() => setModalAbierto(false)}>Cancelar</button>
             <button type="submit" className="btn btn-warning fw-bold">Enviar abono</button>
           </>
         }
       >
         <p className="mb-2">Saldo pendiente: <strong>{formatoPesos(saldo)}</strong> de un cupo de {formatoPesos(cupo)}</p>
         <p className="small text-muted mb-3">El administrador confirmará tu abono. Recién ahí se descuenta de tu saldo y se libera tu cupo.</p>
+        <div className="mb-3">
+          <label htmlFor="a-medio" className="form-label fw-bold">¿Con qué pagaste?</label>
+          <select id="a-medio" className="form-select" value={form.valores.medio} onChange={(e) => form.cambiar("medio", e.target.value)}>
+            {Object.entries(MEDIOS_DE_PAGO).map(([id, texto]) => <option key={id} value={id}>{texto}</option>)}
+          </select>
+        </div>
         <CampoFormulario label="Monto a abonar ($)" type="number" min="1" placeholder="Ej: 5000" {...form.propsCampo("monto")} id="a-monto" />
-        <CampoFormulario label="Detalle (opcional)" placeholder="Ej: Pago en efectivo en tienda" autoComplete="off" value={form.valores.detalle} onChange={(e) => form.cambiar("detalle", e.target.value)} id="a-detalle" className="mb-1" />
+        <CampoFormulario label="Detalle (opcional)" placeholder="Ej: Pagado en caja de la tienda" autoComplete="off" value={form.valores.detalle} onChange={(e) => form.cambiar("detalle", e.target.value)} id="a-detalle" className="mb-1" />
       </ModalBase>
     </div>
   );

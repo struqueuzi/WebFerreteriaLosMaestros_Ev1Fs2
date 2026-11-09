@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import CampoFormulario from "../components/CampoFormulario";
+import Logo from "../components/Logo";
 import PiePagina from "../components/PiePagina";
 import { useFormulario } from "../hooks/useFormulario";
 import { mensajeDuplicado, mensajeResumenErrores, registrarUsuario, validarUsuario } from "../lib/usuarios";
@@ -48,13 +49,13 @@ export default function Registro() {
 
   return (
     <>
-      <header className="sticky-top shadow-sm">
-        <nav className="navbar navbar-dark bg-dark py-3">
+      <header className="sticky-top encabezado">
+        <nav className="navbar navbar-dark">
           <div className="container gap-3">
-            <Link className="navbar-brand fw-bold fs-3 text-warning" to="/">🛠️ LOS MAESTROS</Link>
+            <Logo />
             <div className="d-flex align-items-center gap-3">
               <Link to="/" className="text-white text-decoration-none small">← Volver a la tienda</Link>
-              <Link to="/login" className="btn btn-outline-warning btn-sm">Iniciar sesión</Link>
+              <Link to="/login" className="btn btn-contorno btn-sm">Iniciar sesión</Link>
             </div>
           </div>
         </nav>

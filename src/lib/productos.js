@@ -4,7 +4,10 @@
 import { escribir, leer } from "./almacen";
 
 export const UMBRAL_STOCK_BAJO = 10;
-export const FILTRO_VACIO = { categoria: null, subcategoria: null, texto: "" };
+// "especial" sirve para ver solo las ofertas ("ofertas") o solo los productos nuevos ("nuevos")
+export const FILTRO_VACIO = { categoria: null, subcategoria: null, texto: "", especial: null };
+
+export const DESCUENTO_MAXIMO = 90;
 export const IMAGEN_POR_DEFECTO = "assets/imgs/329f5c6e4eaff31962d0f2cc0bd20b77.jpg";
 
 export const CATEGORIAS_Y_SUBCATEGORIAS = {
@@ -23,6 +26,43 @@ export const PRODUCTOS_DE_EJEMPLO = [
   { id: 6, nombre: "Rotomartillo SDS Plus 800W 26mm",        precio: 52990, stock: 5,   imagen: "assets/imgs/rotomartillo-sds-plus-800w-26mm-shr263ka-b3.jpg", categoria: "Herramientas eléctricas", subcategoria: "Rotomartillos" }
 ];
 
+// Ofertas y novedades de ejemplo. Se aplican una sola vez (ver inicializar.js) para que la tienda
+// no parta sin ofertas. Después el administrador las cambia desde su panel.
+export const OFERTAS_DE_EJEMPLO = {
+  2: { descuento: 20 },
+  3: { descuento: 15 },
+  4: { descuento: 10 },
+  6: { esNuevo: true }
+};
+
+// --------------------------------------------------------
+// PRECIOS CON DESCUENTO
+// "precio" es siempre el precio normal; "descuento" es un % entero (0 = sin oferta)
+// --------------------------------------------------------
+export function descuentoDe(producto) {
+  const d = Number(producto && producto.descuento) || 0;
+  return Math.min(Math.max(Math.round(d), 0), DESCUENTO_MAXIMO);
+}
+
+export function estaEnOferta(producto) {
+  return descuentoDe(producto) > 0;
+}
+
+// Precio que paga el cliente. Se redondea a la decena (en Chile no se cobran pesos sueltos)
+export function precioFinal(producto) {
+  const d = descuentoDe(producto);
+  if (d === 0) return producto.precio;
+  return Math.round((producto.precio * (100 - d)) / 100 / 10) * 10;
+}
+
+export function mensajeErrorDescuento(valor) {
+  const texto = String(valor ?? "").trim();
+  if (texto === "") return "";
+  if (!/^\d+$/.test(texto)) return "El descuento debe ser un número entero.";
+  if (Number(texto) > DESCUENTO_MAXIMO) return `El descuento no puede pasar de ${DESCUENTO_MAXIMO}%.`;
+  return "";
+}
+
 export function obtenerProductos() {
   return leer("productos", []);
 }
@@ -32,14 +72,22 @@ export function guardarProductos(lista) {
 }
 
 // Filtro único para todas las pantallas: por categoría, subcategoría y/o texto de búsqueda
-export function filtrarProductos(productos, { categoria = null, subcategoria = null, texto = "" } = {}) {
-  const t = texto.toLowerCase().trim();
+export function filtrarProductos(productos, { categoria = null, subcategoria = null, texto = "", especial = null } = {}) {
+  const t = (texto || "").toLowerCase().trim();
   return productos.filter((p) => {
     if (categoria && p.categoria !== categoria) return false;
     if (subcategoria && p.subcategoria !== subcategoria) return false;
+    if (especial === "ofertas" && !estaEnOferta(p)) return false;
+    if (especial === "nuevos" && !p.esNuevo) return false;
     if (t && !(p.nombre.toLowerCase().includes(t) || p.categoria.toLowerCase().includes(t) || (p.subcategoria || "").toLowerCase().includes(t))) return false;
     return true;
   });
+}
+
+// Productos para la portada: primero los que tienen oferta o son nuevos
+export function productosDestacados(productos, cantidad = 5) {
+  const puntaje = (p) => (estaEnOferta(p) ? 2 : 0) + (p.esNuevo ? 1 : 0);
+  return [...productos].sort((a, b) => puntaje(b) - puntaje(a)).slice(0, cantidad);
 }
 
 // Arma la estructura del menú: solo las categorías/subcategorías que TIENEN productos,
@@ -60,8 +108,10 @@ export function agruparCategorias(productos) {
 }
 
 // Texto que explica qué filtro está activo. Ej: "Mostrando: Gasfitería › Tuberías PVC (1)"
-export function describirFiltro({ categoria = null, subcategoria = null, texto = "" } = {}, cantidad = 0) {
+export function describirFiltro({ categoria = null, subcategoria = null, texto = "", especial = null } = {}, cantidad = 0) {
   const partes = [];
+  if (especial === "ofertas") partes.push("Ofertas");
+  if (especial === "nuevos") partes.push("Novedades");
   if (categoria) partes.push(categoria);
   if (subcategoria) partes.push(subcategoria);
   if (texto) partes.push(`“${texto}”`);

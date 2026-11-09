@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAlmacen } from "../hooks/useAlmacen";
 import { formatoPesos } from "../lib/formato";
-import { actualizarEstadoPedido, ESTADOS_PEDIDO, obtenerPedidos } from "../lib/pedidos";
+import { actualizarEstadoPedido, ESTADOS_PEDIDO, nombreFormaPago, obtenerPedidos } from "../lib/pedidos";
 
 function FilaPedido({ pedido }) {
   const [estado, setEstado] = useState(pedido.estado);
@@ -14,16 +14,16 @@ function FilaPedido({ pedido }) {
   };
 
   const entrega = pedido.tipoEntrega === "despacho" ? `Despacho: ${pedido.direccion || "sin dirección"}` : "Retiro en tienda";
-  const pago = pedido.formaPago === "cuenta_corriente" ? "Cuenta corriente" : "Pago normal";
+  const pago = nombreFormaPago(pedido.formaPago);
 
   return (
     <tr>
-      <td className="small">{pedido.fecha}</td>
+      <td className="small">{pedido.numeroVenta ? <div className="fw-bold">N° {pedido.numeroVenta}</div> : null}{pedido.fecha}</td>
       <td>{pedido.clienteCorreo}<div className="small text-muted">{entrega}</div></td>
       <td>{pedido.productoNombre}</td>
       <td>{pedido.cantidad}</td>
       <td>{formatoPesos(pedido.total)}</td>
-      <td className="small">{pago}</td>
+      <td className="small">{pago}{pedido.estadoPago && <div><span className={`badge ${pedido.estadoPago === "Confirmado" ? "bg-success" : pedido.estadoPago === "Rechazado" ? "bg-danger" : "bg-warning text-dark"}`}>{pedido.estadoPago}</span></div>}</td>
       <td>
         <select className="form-select form-select-sm select-estado" aria-label="Estado del pedido" value={estado} onChange={(e) => setEstado(e.target.value)}>
           {ESTADOS_PEDIDO.map((e) => <option key={e} value={e}>{e}</option>)}
@@ -45,7 +45,7 @@ export default function TablaPedidos() {
   return (
     <div className="table-responsive">
       <table className="table table-hover align-middle mb-0">
-        <thead className="table-light">
+        <thead>
           <tr>
             <th>Fecha</th><th>Cliente / entrega</th><th>Producto</th><th>Cant.</th>
             <th>Total</th><th>Pago</th><th style={{ minWidth: 150 }}>Estado</th><th></th>

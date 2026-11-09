@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Catalogo from "../components/Catalogo";
 import CuentaCorriente from "../components/CuentaCorriente";
 import HistorialCompras from "../components/HistorialCompras";
@@ -12,24 +13,22 @@ export default function PanelCliente() {
   const [filtro, setFiltro] = useState(FILTRO_VACIO);
 
   const barra = (
-    <div className="bg-secondary py-2">
+    <div className="barra-filtros py-2">
       <div className="container">
         <MenuCategorias onElegir={(categoria, subcategoria) => setFiltro((f) => ({ ...f, categoria, subcategoria }))} />
       </div>
     </div>
   );
 
-  const irAPedidos = () => document.getElementById("historial")?.scrollIntoView({ behavior: "smooth" });
-
   return (
     <LayoutPanel conTienda barra={barra}>
       <section className="row g-3 mb-4" aria-label="Resumen">
         <div className={usuario.cuentaCorriente ? "col-12 col-md-7" : "col-12"}>
           <div className="card shadow-sm border-0 p-4 rounded-3 h-100">
-            <h1 className="fw-bold h2">Bienvenido, {usuario.nombre}</h1>
-            <p className="text-muted">Cliente registrado · compra, revisa tu carrito y sigue tus pedidos.</p>
+            <h1 className="fw-bold h2">Hola, {usuario.nombre}</h1>
+            <p className="text-muted">Cliente registrado · compra, revisa tu carrito y mira el historial de todo lo que has comprado.</p>
             <div>
-              <button type="button" className="btn btn-outline-dark btn-sm fw-bold" onClick={irAPedidos}>📦 Mis pedidos</button>
+              <Link to="/cliente/compras" className="btn btn-pill btn-pill-chico">Ver mis compras</Link>
             </div>
           </div>
         </div>
@@ -41,7 +40,7 @@ export default function PanelCliente() {
       </section>
 
       <section className="card shadow-sm border-0 p-4 rounded-3 mb-4" aria-labelledby="titulo-catalogo">
-        <h2 className="fw-bold h4 mb-3" id="titulo-catalogo">🧱 Catálogo de productos</h2>
+        <h2 className="titulo-seccion h4 mb-3" id="titulo-catalogo">Catálogo de productos</h2>
         <div className="mb-2">
           <label htmlFor="buscador-panel" className="visually-hidden">Buscar productos</label>
           <input type="search" id="buscador-panel" className="form-control" placeholder="Buscar producto, categoría..." autoComplete="off" value={filtro.texto} onChange={(e) => setFiltro({ ...filtro, texto: e.target.value })} />
@@ -50,7 +49,10 @@ export default function PanelCliente() {
       </section>
 
       <section className="card shadow-sm border-0 p-4 rounded-3" id="historial" aria-labelledby="titulo-historial">
-        <h2 className="fw-bold h4 mb-3" id="titulo-historial">📦 Mis pedidos y seguimiento</h2>
+        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h2 className="titulo-seccion h4 mb-0" id="titulo-historial">Mis compras</h2>
+          <Link to="/cliente/compras" className="link-neon">Ver todas y filtrar →</Link>
+        </div>
         <HistorialCompras correo={usuario.correo} />
       </section>
     </LayoutPanel>

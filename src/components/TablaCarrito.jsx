@@ -5,7 +5,7 @@ export default function TablaCarrito({ items, onCambiar, onEliminar }) {
   return (
     <div className="table-responsive">
       <table className="table align-middle mb-0">
-        <thead className="table-light">
+        <thead>
           <tr>
             <th>Producto</th>
             <th>Precio</th>
@@ -17,18 +17,18 @@ export default function TablaCarrito({ items, onCambiar, onEliminar }) {
         <tbody>
           {items.map((item, indice) => (
             <tr key={item.id}>
-              <td><span className="fw-bold text-dark">{item.nombre}</span></td>
-              <td>{formatoPesos(item.precio)}</td>
+              <td><span className="fw-bold">{item.nombre}</span>{item.descuento > 0 && <span className="etiqueta-oferta estatica ms-2">-{item.descuento}%</span>}</td>
+              <td>{formatoPesos(item.precio)}{item.descuento > 0 && <div><s className="precio-antes small">{formatoPesos(item.precioNormal)}</s></div>}</td>
               <td>
                 <div className="input-group input-group-sm" style={{ maxWidth: 120 }}>
-                  <button className="btn btn-outline-secondary btn-menos" type="button" aria-label="Quitar una unidad" onClick={() => onCambiar(indice, -1)}>-</button>
-                  <input type="text" className="form-control text-center bg-white text-dark" value={item.cantidad} readOnly aria-label="Cantidad" />
-                  <button className="btn btn-outline-secondary btn-mas" type="button" aria-label="Agregar una unidad" onClick={() => onCambiar(indice, 1)}>+</button>
+                  <button className="btn btn-outline-warning btn-menos" type="button" aria-label="Quitar una unidad" onClick={() => onCambiar(indice, -1)}>-</button>
+                  <input type="text" className="form-control text-center" value={item.cantidad} readOnly aria-label="Cantidad" />
+                  <button className="btn btn-outline-warning btn-mas" type="button" aria-label="Agregar una unidad" onClick={() => onCambiar(indice, 1)}>+</button>
                 </div>
               </td>
-              <td className="fw-bold text-dark">{formatoPesos(item.precio * item.cantidad)}</td>
+              <td className="fw-bold">{formatoPesos(item.precio * item.cantidad)}</td>
               <td>
-                <button className="btn btn-sm btn-outline-danger btn-eliminar" type="button" aria-label="Eliminar del carrito" onClick={() => onEliminar(indice)}>🗑️</button>
+                <button className="btn btn-sm btn-outline-danger btn-eliminar" type="button" aria-label="Eliminar del carrito" onClick={() => onEliminar(indice)}>✕</button>
               </td>
             </tr>
           ))}

@@ -1,13 +1,37 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import DatosTransferencia from "../components/DatosTransferencia";
 import LayoutTienda from "../components/LayoutTienda";
 import TablaCarrito from "../components/TablaCarrito";
 import { useAviso } from "../context/AvisoContext";
 import { useAlmacen } from "../hooks/useAlmacen";
 import { useSesion } from "../hooks/useSesion";
 import { formatoPesos } from "../lib/formato";
-import { cambiarCantidadEnCarrito, confirmarCarrito, eliminarDelCarrito, obtenerCarrito, totalCarrito } from "../lib/pedidos";
+import { cambiarCantidadEnCarrito, confirmarCarrito, eliminarDelCarrito, FORMAS_DE_PAGO, obtenerCarrito, totalCarrito } from "../lib/pedidos";
+import { obtenerDatosTransferencia } from "../lib/transferencia";
 import { cupoDisponible } from "../lib/usuarios";
+
+// Pantalla que aparece después de confirmar un pedido pagado con transferencia
+function CompraConTransferencia({ compra }) {
+  return (
+    <div className="row justify-content-center">
+      <div className="col-12 col-lg-7">
+        <div className="card p-4 compra-lista">
+          <h1 className="titulo-seccion h2 mb-2">Pedido N° {compra.numeroVenta} registrado</h1>
+          <p className="text-muted">
+            Tu pedido quedó reservado. Para que lo preparemos solo falta que hagas la transferencia con estos datos.
+            También los vas a encontrar en <strong>Mis compras</strong>.
+          </p>
+          <DatosTransferencia datos={compra.datosTransferencia} monto={compra.total} referencia={compra.numeroVenta} />
+          <div className="d-flex gap-2 flex-wrap mt-4">
+            <Link to="/cliente/compras" className="btn btn-pill">Ver mis compras</Link>
+            <Link to="/productos" className="btn btn-contorno-oscuro">Seguir comprando</Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Carrito() {
   useAlmacen();
@@ -17,12 +41,16 @@ export default function Carrito() {
   const [tipoEntrega, setTipoEntrega] = useState("retiro");
   const [direccion, setDireccion] = useState("");
   const [formaPago, setFormaPago] = useState("normal");
+  const [compraTransferencia, setCompraTransferencia] = useState(null);
 
   const items = obtenerCarrito();
   const total = totalCarrito();
   // Solo el cliente con cuenta corriente puede pagar con su cupo
   const puedeCuentaCorriente = !!usuario && usuario.rol === "cliente" && !!usuario.cuentaCorriente;
-  const pagaConCuentaCorriente = puedeCuentaCorriente && formaPago === "cuenta_corriente";
+  // Si eligió cuenta corriente y después cambió de cuenta, se vuelve a pago normal
+  const formaPagoReal = formaPago === "cuenta_corriente" && !puedeCuentaCorriente ? "normal" : formaPago;
+  const pagaConCuentaCorriente = formaPagoReal === "cuenta_corriente";
+  const pagaConTransferencia = formaPagoReal === "transferencia";
 
   const cambiar = (indice, cambio) => {
     const res = cambiarCantidadEnCarrito(indice, cambio);
@@ -64,47 +92,58 @@ export default function Carrito() {
     const res = confirmarCarrito(usuario.correo, {
       tipoEntrega,
       direccion: direccion.trim(),
-      formaPago: pagaConCuentaCorriente ? "cuenta_corriente" : "normal"
+      formaPago: formaPagoReal
     });
     mostrarAviso(res.mensaje, res.exito);
-    if (res.exito) setTimeout(() => navigate("/cliente"), 1500); // al panel, a ver el seguimiento
+    if (!res.exito) return;
+
+    // Con transferencia se queda en esta página mostrando la cuenta y el monto; con lo demás va al panel
+    if (res.formaPago === "transferencia") setCompraTransferencia(res);
+    else setTimeout(() => navigate("/cliente/compras"), 1500);
   };
+
+  if (compraTransferencia) {
+    return (
+      <LayoutTienda>
+        <CompraConTransferencia compra={compraTransferencia} />
+      </LayoutTienda>
+    );
+  }
 
   return (
     <LayoutTienda>
-      <h1 className="fw-bold mb-4">🛒 Mi Carrito de Compras</h1>
+      <h1 className="titulo-seccion mb-4">Mi carrito de compras</h1>
       <div className="row g-4">
         <div className="col-12 col-lg-8">
-          <div className="card shadow-sm border-0 p-4 bg-white rounded-3">
+          <div className="card p-4">
             {items.length > 0 ? (
               <TablaCarrito items={items} onCambiar={cambiar} onEliminar={eliminarDelCarrito} />
             ) : (
               <div className="text-center py-5">
-                <h4 className="text-muted">Tu carrito está vacío 🛠️</h4>
-                <Link to="/productos" className="btn btn-warning mt-3 fw-bold">Ir a buscar productos</Link>
+                <h4 className="text-muted">Tu carrito está vacío</h4>
+                <Link to="/productos" className="btn btn-pill mt-3">Ir a buscar productos</Link>
               </div>
             )}
           </div>
         </div>
 
         <div className="col-12 col-lg-4">
-          <div className="card shadow-sm border-0 p-4 bg-white rounded-3 mb-4">
-            <h4 className="fw-bold mb-3">Resumen de Compra</h4>
-            <hr />
-            <div className="d-flex justify-content-between fs-5">
-              <span>Total:</span>
-              <span className="fw-bold text-primary fs-4" data-testid="total-compra">{formatoPesos(total)}</span>
+          <div className="card resumen-compra p-4 mb-4">
+            <h4 className="fw-bold mb-3">Resumen de compra</h4>
+            <div className="d-flex justify-content-between align-items-baseline">
+              <span>Total</span>
+              <span className="precio precio-grande" data-testid="total-compra">{formatoPesos(total)}</span>
             </div>
           </div>
 
-          <div className="card shadow-sm border-0 p-4 bg-white rounded-3">
-            <h5 className="fw-bold mb-3">Información de Entrega</h5>
+          <div className="card p-4">
+            <h5 className="fw-bold mb-3">Entrega y pago</h5>
             <form onSubmit={confirmar} noValidate>
               <div className="mb-3">
                 <label htmlFor="tipoEntrega" className="form-label small fw-bold">Tipo de entrega</label>
                 <select className="form-select" id="tipoEntrega" value={tipoEntrega} onChange={(e) => setTipoEntrega(e.target.value)}>
-                  <option value="retiro">Retiro en Tienda (La Serena)</option>
-                  <option value="despacho">Despacho a Domicilio</option>
+                  <option value="retiro">Retiro en tienda (La Serena)</option>
+                  <option value="despacho">Despacho a domicilio</option>
                 </select>
               </div>
 
@@ -115,18 +154,25 @@ export default function Carrito() {
                 </div>
               )}
 
-              {puedeCuentaCorriente && (
-                <div className="mb-3">
-                  <label htmlFor="formaPago" className="form-label small fw-bold">Forma de pago</label>
-                  <select className="form-select" id="formaPago" value={formaPago} onChange={(e) => setFormaPago(e.target.value)}>
-                    <option value="normal">Pago normal (en tienda / contra entrega)</option>
+              <div className="mb-3">
+                <label htmlFor="formaPago" className="form-label small fw-bold">Forma de pago</label>
+                <select className="form-select" id="formaPago" value={formaPagoReal} onChange={(e) => setFormaPago(e.target.value)}>
+                  <option value="normal">{FORMAS_DE_PAGO.normal}</option>
+                  <option value="transferencia">{FORMAS_DE_PAGO.transferencia}</option>
+                  {puedeCuentaCorriente && (
                     <option value="cuenta_corriente">Cuenta corriente (disponible {formatoPesos(cupoDisponible(usuario))})</option>
-                  </select>
-                  {avisoCupo && <div className={avisoCupo.clase}>{avisoCupo.texto}</div>}
+                  )}
+                </select>
+                {avisoCupo && <div className={avisoCupo.clase}>{avisoCupo.texto}</div>}
+              </div>
+
+              {pagaConTransferencia && (
+                <div className="mb-3">
+                  <DatosTransferencia datos={obtenerDatosTransferencia()} monto={total} />
                 </div>
               )}
 
-              <button type="submit" className="btn btn-warning w-100 fw-bold py-2 mt-2">Confirmar pedido</button>
+              <button type="submit" className="btn btn-pill w-100 mt-2">Confirmar pedido</button>
               {!usuario && (
                 <p className="small text-muted mt-3 mb-0">
                   Para confirmar necesitas una cuenta de cliente.{" "}

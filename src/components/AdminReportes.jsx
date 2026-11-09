@@ -5,8 +5,8 @@ import { UMBRAL_STOCK_BAJO } from "../lib/productos";
 
 function TarjetaKpi({ titulo, valor, icono, clase = "" }) {
   return (
-    <div className="col-6 col-lg-3">
-      <div className="card shadow-sm border-0 h-100 p-3">
+    <div className="col-6 col-lg-4">
+      <div className="card kpi h-100 p-3">
         <div className="small text-muted">{icono} {titulo}</div>
         <div className={`fs-4 fw-bold ${clase}`}>{valor}</div>
       </div>
@@ -31,6 +31,7 @@ export default function AdminReportes() {
         <TarjetaKpi titulo="Productos" valor={r.totalProductos} icono="🧱" />
         <TarjetaKpi titulo="Unidades en inventario" valor={r.unidadesInventario} icono="🏬" />
         <TarjetaKpi titulo="Valor del inventario" valor={formatoPesos(r.valorInventario)} icono="🏷️" />
+        <TarjetaKpi titulo="Transferencias por confirmar" valor={r.transferenciasPorConfirmar} icono="🏦" clase={r.transferenciasPorConfirmar > 0 ? "text-warning" : ""} />
       </div>
 
       <div className="row g-4">

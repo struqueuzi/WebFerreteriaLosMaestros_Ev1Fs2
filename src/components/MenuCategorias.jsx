@@ -28,7 +28,7 @@ export default function MenuCategorias({ onElegir }) {
   return (
     <ul className="nav gap-4 small fw-bold flex-wrap" id="menu-categorias" ref={ref}>
       <li className="nav-item">
-        <button type="button" className="nav-link text-white p-0" onClick={() => elegir(null, null)}>🧱 Todos los productos</button>
+        <button type="button" className="nav-link text-white p-0" onClick={() => elegir(null, null)}>Todos los productos</button>
       </li>
       {grupos.map(({ categoria, subcategorias }) => (
         <li key={categoria} className={`nav-item menu-item-categoria${abierta === categoria ? " abierto" : ""}`}>

@@ -44,4 +44,18 @@ describe("Componente TarjetaProducto", () => {
     const vista = montar(<TarjetaProducto producto={producto} onAgregar={() => {}} />);
     expect(vista.querySelector("a").getAttribute("href")).toContain("/producto/3");
   });
+
+  it("con descuento muestra la etiqueta, el precio rebajado y el anterior tachado", () => {
+    const vista = montar(<TarjetaProducto producto={{ ...producto, descuento: 15 }} onAgregar={() => {}} />);
+    expect(vista.querySelector(".etiqueta-oferta").textContent).toBe("-15%");
+    expect(vista.querySelector(".precio").textContent).toBe("$7.640");
+    expect(vista.querySelector(".precio-antes").textContent).toBe("$8.990");
+  });
+
+  it("un producto nuevo sin descuento muestra la etiqueta «Nuevo»", () => {
+    const vista = montar(<TarjetaProducto producto={{ ...producto, esNuevo: true }} onAgregar={() => {}} />);
+    expect(vista.querySelector(".etiqueta-oferta").textContent).toBe("Nuevo");
+    expect(vista.querySelector(".precio-antes")).toBeNull();
+  });
 });
+

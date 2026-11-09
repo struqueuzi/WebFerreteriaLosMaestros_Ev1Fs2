@@ -3,8 +3,10 @@ import RutaProtegida from "./components/RutaProtegida";
 import { AvisoProvider } from "./context/AvisoContext";
 import Carrito from "./pages/Carrito";
 import DetalleProducto from "./pages/DetalleProducto";
+import EstadoCuenta from "./pages/EstadoCuenta";
 import Inicio from "./pages/Inicio";
 import Login from "./pages/Login";
+import MisCompras from "./pages/MisCompras";
 import PanelAdmin from "./pages/PanelAdmin";
 import PanelCliente from "./pages/PanelCliente";
 import PanelVendedor from "./pages/PanelVendedor";
@@ -25,6 +27,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
           <Route path="/cliente" element={<RutaProtegida rol="cliente"><PanelCliente /></RutaProtegida>} />
+          <Route path="/cliente/cuenta" element={<RutaProtegida rol="cliente"><EstadoCuenta /></RutaProtegida>} />
+          <Route path="/cliente/compras" element={<RutaProtegida rol="cliente"><MisCompras /></RutaProtegida>} />
           <Route path="/vendedor" element={<RutaProtegida rol="vendedor"><PanelVendedor /></RutaProtegida>} />
           <Route path="/admin" element={<RutaProtegida rol="admin"><PanelAdmin /></RutaProtegida>} />
           <Route path="*" element={<Navigate to="/" replace />} />

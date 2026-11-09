@@ -46,7 +46,7 @@ describe("Componente MenuCategorias", () => {
   it("«Todos los productos» quita el filtro", () => {
     const onElegir = jasmine.createSpy("onElegir");
     const vista = montar(<MenuCategorias onElegir={onElegir} />);
-    clic(botonPorTexto(vista, "🧱 Todos los productos"));
+    clic(botonPorTexto(vista, "Todos los productos"));
     expect(onElegir).toHaveBeenCalledOnceWith(null, null);
   });
 });

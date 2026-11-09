@@ -114,7 +114,7 @@ export default function AdminUsuarios() {
 
       <div className="table-responsive">
         <table className="table table-hover align-middle mb-0">
-          <thead className="table-light">
+          <thead>
             <tr><th>Nombre</th><th>Correo</th><th>RUT / Teléfono</th><th>Rol</th><th>Estado</th><th>Cta. corriente</th><th></th></tr>
           </thead>
           <tbody>
@@ -123,7 +123,7 @@ export default function AdminUsuarios() {
               const activo = u.activo !== false;
               return (
                 <tr key={u.id} className={activo ? "" : "table-secondary text-muted"}>
-                  <td>{u.nombre} {esYo && <span className="badge bg-dark">tú</span>}</td>
+                  <td>{u.nombre} {esYo && <span className="badge bg-secondary">tú</span>}</td>
                   <td>{u.correo}</td>
                   <td className="small">{u.rut}<br />{u.telefono}</td>
                   <td><span className="badge bg-secondary">{NOMBRE_ROL[u.rol] || u.rol}</span></td>
@@ -132,7 +132,7 @@ export default function AdminUsuarios() {
                     {u.cuentaCorriente ? <>Cupo {formatoPesos(u.cupoCuentaCorriente || 0)}<br />Debe <strong>{formatoPesos(u.saldoPendiente || 0)}</strong></> : "No"}
                   </td>
                   <td className="text-end text-nowrap">
-                    <button type="button" className="btn btn-sm btn-outline-dark btn-editar" onClick={() => abrir(u.id)}>Editar</button>{" "}
+                    <button type="button" className="btn btn-sm btn-outline-warning btn-editar" onClick={() => abrir(u.id)}>Editar</button>{" "}
                     <button
                       type="button"
                       className={`btn btn-sm ${activo ? "btn-outline-danger" : "btn-outline-success"} btn-estado`}
