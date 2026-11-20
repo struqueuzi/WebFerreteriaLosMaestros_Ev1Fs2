@@ -1,3 +1,4 @@
+import { apiActiva, usuarioRemoto, usuariosRemotos, abonosRemotos } from "./api";
 // ========================================================
 // usuarios.js - Usuarios, sesión, cuenta corriente (cupo) y abonos
 // ========================================================
@@ -15,6 +16,7 @@ export const CUPO_CUENTA_CORRIENTE_POR_DEFECTO = 40000;
 // 1. USUARIOS: validación completa y control de duplicados
 // --------------------------------------------------------
 export function obtenerUsuarios() {
+  if (apiActiva()) return usuariosRemotos();
   return leer("usuarios", []);
 }
 
@@ -187,6 +189,7 @@ export function iniciarSesion(correo, clave) {
 // Devuelve SIEMPRE los datos actuales del usuario con sesión iniciada
 // (si el admin le cambió el rol, lo desactivó o actualizó su saldo, se nota de inmediato).
 export function obtenerSesionActual() {
+  if (apiActiva()) return usuarioRemoto();
   const guardada = leer("sesionActual", null);
   if (!guardada) return null;
 
@@ -307,6 +310,7 @@ export function registrarAbono(idUsuario, monto, detalle = "", medio = "efectivo
 // ---- Solicitudes de abono: el CLIENTE avisa que pagó y el ADMINISTRADOR las aprueba o rechaza ----
 // Estados: "Pendiente" (esperando al administrador) -> "Aprobado" (se descuenta del saldo) o "Rechazado"
 export function obtenerAbonos() {
+  if (apiActiva()) return abonosRemotos();
   return leer("abonos", []);
 }
 

@@ -1,3 +1,4 @@
+import { apiActiva, cargarPedidos, cargarProductos, peticion } from "../lib/api";
 import { Fragment, useState } from "react";
 import { useAviso } from "../context/AvisoContext";
 import { useAlmacen } from "../hooks/useAlmacen";
@@ -41,8 +42,16 @@ export default function AdminVentas() {
 
   const cambiar = (campo) => (e) => setFiltros({ ...filtros, [campo]: e.target.value });
 
-  const resolver = (numeroVenta, aprobar) => {
+  const resolver = async (numeroVenta, aprobar) => {
     if (!aprobar && !window.confirm(`¿Rechazar el pago de la venta N° ${numeroVenta}? El stock vuelve al inventario.`)) return;
+    if (apiActiva()) {
+      try {
+        await peticion(`/ordenes/${numeroVenta}/pago`, { metodo: "PATCH", datos: { aprobar } }, true);
+        await Promise.all([cargarPedidos(), cargarProductos()]);
+        mostrarAviso("Pago actualizado.");
+      } catch (error) { mostrarAviso(error.message, false); }
+      return;
+    }
     const res = resolverPagoTransferencia(numeroVenta, aprobar);
     mostrarAviso(res.mensaje, res.exito);
   };

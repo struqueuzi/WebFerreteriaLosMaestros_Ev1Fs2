@@ -1,3 +1,4 @@
+import { apiActiva, cargarDatosDeCuenta, peticion } from "../lib/api";
 import { useState } from "react";
 import CampoFormulario from "./CampoFormulario";
 import ModalBase from "./ModalBase";
@@ -21,7 +22,7 @@ const VALORES_NUEVO = {
 
 function valoresDe(u) {
   return {
-    nombre: u.nombre, rut: u.rut, correo: u.correo, telefono: u.telefono, clave: "", rol: u.rol,
+    nombre: u.nombre, rut: u.rut || "", correo: u.correo, telefono: u.telefono || "", clave: "", rol: u.rol,
     activo: u.activo !== false, cuentaCorriente: !!u.cuentaCorriente,
     cupo: String(u.cupoCuentaCorriente || CUPO_CUENTA_CORRIENTE_POR_DEFECTO), saldo: String(u.saldoPendiente || 0)
   };
@@ -65,7 +66,7 @@ export default function AdminUsuarios() {
     });
   };
 
-  const guardar = (e) => {
+  const guardar = async (e) => {
     e.preventDefault();
     setErrorGeneral("");
     if (!form.validarTodo()) return;
@@ -75,6 +76,19 @@ export default function AdminUsuarios() {
       clave: valores.clave, rol: valores.rol, activo: valores.activo, cuentaCorriente: valores.cuentaCorriente,
       saldoPendiente: valores.saldo, cupoCuentaCorriente: valores.cupo
     };
+
+    if (apiActiva()) {
+      const crear = editandoId === null;
+      try {
+        await peticion(crear ? "/usuarios" : `/usuarios/${editandoId}`, { metodo: crear ? "POST" : "PUT", datos: {
+          ...datos, saldoPendiente: Number(datos.saldoPendiente), cupoCuentaCorriente: Number(datos.cupoCuentaCorriente)
+        } }, true);
+        await cargarDatosDeCuenta();
+        setModalAbierto(false);
+        mostrarAviso(crear ? "Usuario creado correctamente." : "Usuario actualizado correctamente.");
+      } catch (error) { setErrorGeneral(error.message); }
+      return;
+    }
 
     let res;
     if (editandoId !== null) {
@@ -100,7 +114,15 @@ export default function AdminUsuarios() {
     mostrarAviso(editandoId !== null ? "Usuario actualizado correctamente." : "Usuario creado correctamente.");
   };
 
-  const cambiarEstado = (u, activo) => {
+  const cambiarEstado = async (u, activo) => {
+    if (apiActiva()) {
+      try {
+        await peticion(`/usuarios/${u.id}`, { metodo: "PATCH", datos: { activo } }, true);
+        await cargarDatosDeCuenta();
+        mostrarAviso("Estado actualizado.");
+      } catch (error) { mostrarAviso(error.message, false); }
+      return;
+    }
     const res = cambiarEstadoUsuario(u.id, activo);
     mostrarAviso(res.mensaje, res.exito);
   };

@@ -1,3 +1,4 @@
+import { apiActiva, cargarCuentaBancaria, peticion } from "../lib/api";
 import { useState } from "react";
 import CampoFormulario from "./CampoFormulario";
 import DatosTransferencia from "./DatosTransferencia";
@@ -13,7 +14,7 @@ import {
 export default function AdminTransferencia() {
   useAlmacen();
   const { mostrarAviso } = useAviso();
-  const [datos, setDatos] = useState(obtenerDatosTransferencia);
+  const [datos, setDatos] = useState(() => obtenerDatosTransferencia() || { banco: "", tipoCuenta: TIPOS_DE_CUENTA[0], numeroCuenta: "", titular: "", rut: "", correo: "" });
   const [errores, setErrores] = useState({});
 
   const cambiar = (campo) => (e) => {
@@ -23,8 +24,22 @@ export default function AdminTransferencia() {
     if (errores[campo]) setErrores({ ...errores, [campo]: validarDatosTransferencia(nuevos)[campo] || "" });
   };
 
-  const guardar = (e) => {
+  const guardar = async (e) => {
     e.preventDefault();
+    if (apiActiva()) {
+      const erroresNuevos = validarDatosTransferencia(datos);
+      setErrores(erroresNuevos);
+      if (Object.keys(erroresNuevos).length) return;
+      try {
+        await peticion("/transferencia", { metodo: "PUT", datos: {
+          ...datos, numeroCuenta: datos.numeroCuenta.replace(/[\s-]/g, "")
+        } }, true);
+        await cargarCuentaBancaria();
+        setDatos(obtenerDatosTransferencia());
+        mostrarAviso("Datos de transferencia guardados.");
+      } catch (error) { mostrarAviso(error.message, false); }
+      return;
+    }
     const res = guardarDatosTransferencia(datos);
     setErrores(res.errores);
     mostrarAviso(res.mensaje, res.exito);
@@ -78,7 +93,7 @@ export default function AdminTransferencia() {
             </div>
             <div className="d-flex gap-2 flex-wrap">
               <button type="submit" className="btn btn-pill" id="btn-guardar-transferencia">Guardar datos</button>
-              <button type="button" className="btn btn-contorno-oscuro" onClick={restablecer}>Restablecer datos de ejemplo</button>
+              {!apiActiva() && <button type="button" className="btn btn-contorno-oscuro" onClick={restablecer}>Restablecer datos de ejemplo</button>}
             </div>
           </form>
         </div>

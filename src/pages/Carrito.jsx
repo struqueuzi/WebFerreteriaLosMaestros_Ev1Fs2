@@ -1,3 +1,4 @@
+import { apiActiva, cargarDatosDeCuenta, cargarPedidos, cargarProductos, peticion } from "../lib/api";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import DatosTransferencia from "../components/DatosTransferencia";
@@ -7,7 +8,7 @@ import { useAviso } from "../context/AvisoContext";
 import { useAlmacen } from "../hooks/useAlmacen";
 import { useSesion } from "../hooks/useSesion";
 import { formatoPesos } from "../lib/formato";
-import { cambiarCantidadEnCarrito, confirmarCarrito, eliminarDelCarrito, FORMAS_DE_PAGO, obtenerCarrito, totalCarrito } from "../lib/pedidos";
+import { cambiarCantidadEnCarrito, confirmarCarrito, eliminarDelCarrito, FORMAS_DE_PAGO, obtenerCarrito, totalCarrito, vaciarCarrito } from "../lib/pedidos";
 import { obtenerDatosTransferencia } from "../lib/transferencia";
 import { cupoDisponible } from "../lib/usuarios";
 
@@ -48,7 +49,9 @@ export default function Carrito() {
   // Solo el cliente con cuenta corriente puede pagar con su cupo
   const puedeCuentaCorriente = !!usuario && usuario.rol === "cliente" && !!usuario.cuentaCorriente;
   // Si eligió cuenta corriente y después cambió de cuenta, se vuelve a pago normal
-  const formaPagoReal = formaPago === "cuenta_corriente" && !puedeCuentaCorriente ? "normal" : formaPago;
+  const datosBancarios = obtenerDatosTransferencia();
+  const formaPagoReal = (formaPago === "cuenta_corriente" && !puedeCuentaCorriente) ||
+    (formaPago === "transferencia" && !datosBancarios) ? "normal" : formaPago;
   const pagaConCuentaCorriente = formaPagoReal === "cuenta_corriente";
   const pagaConTransferencia = formaPagoReal === "transferencia";
 
@@ -66,7 +69,9 @@ export default function Carrito() {
       : { clase: "form-text text-success", texto: `Tu saldo pendiente quedaría en ${formatoPesos((usuario.saldoPendiente || 0) + total)} de ${formatoPesos(usuario.cupoCuentaCorriente)}.` };
   }
 
-  const confirmar = (e) => {
+  const [enviando, setEnviando] = useState(false);
+
+  const confirmar = async (e) => {
     e.preventDefault();
 
     if (items.length === 0) {
@@ -86,6 +91,31 @@ export default function Carrito() {
     }
     if (tipoEntrega === "despacho" && direccion.trim().length < 5) {
       mostrarAviso("Ingresa una dirección de despacho válida.", false);
+      return;
+    }
+
+    if (apiActiva()) {
+      if (enviando) return;
+      setEnviando(true);
+      try {
+        const orden = await peticion("/ordenes", { metodo: "POST", datos: {
+          tipoEntrega, direccion: direccion.trim(), formaPago: formaPagoReal,
+          items: items.map(({ id, cantidad }) => ({ productoId: id, cantidad }))
+        } }, true);
+        vaciarCarrito();
+        mostrarAviso(`Orden N° ${orden.id} registrada.`);
+        const cargas = await Promise.allSettled([cargarProductos(), cargarPedidos(), cargarDatosDeCuenta()]);
+        if (cargas.some((carga) => carga.status === "rejected")) {
+          mostrarAviso("La orden quedó guardada. Recarga para actualizar los datos.", false);
+        }
+        if (orden.formaPago === "transferencia") {
+          setCompraTransferencia({ ...orden, numeroVenta: orden.id, datosTransferencia: orden.datosTransferencia });
+        } else navigate("/cliente/compras");
+      } catch (error) {
+        mostrarAviso(error.message, false);
+      } finally {
+        setEnviando(false);
+      }
       return;
     }
 
@@ -158,7 +188,7 @@ export default function Carrito() {
                 <label htmlFor="formaPago" className="form-label small fw-bold">Forma de pago</label>
                 <select className="form-select" id="formaPago" value={formaPagoReal} onChange={(e) => setFormaPago(e.target.value)}>
                   <option value="normal">{FORMAS_DE_PAGO.normal}</option>
-                  <option value="transferencia">{FORMAS_DE_PAGO.transferencia}</option>
+                  {datosBancarios && <option value="transferencia">{FORMAS_DE_PAGO.transferencia}</option>}
                   {puedeCuentaCorriente && (
                     <option value="cuenta_corriente">Cuenta corriente (disponible {formatoPesos(cupoDisponible(usuario))})</option>
                   )}
@@ -172,7 +202,7 @@ export default function Carrito() {
                 </div>
               )}
 
-              <button type="submit" className="btn btn-pill w-100 mt-2">Confirmar pedido</button>
+              <button type="submit" disabled={enviando} className="btn btn-pill w-100 mt-2">Confirmar pedido</button>
               {!usuario && (
                 <p className="small text-muted mt-3 mb-0">
                   Para confirmar necesitas una cuenta de cliente.{" "}
