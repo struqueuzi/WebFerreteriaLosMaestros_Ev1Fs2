@@ -1,3 +1,4 @@
+import { apiActiva, cargarDatosDeCuenta, peticion } from "../lib/api";
 import { useState } from "react";
 import { useAviso } from "../context/AvisoContext";
 import { useAlmacen } from "../hooks/useAlmacen";
@@ -19,7 +20,15 @@ export default function AdminAbonos() {
   const clienteCartola = conCuenta.find((u) => u.id === idCliente) || conCuenta[0];
   const abonos = [...obtenerAbonos()].reverse().sort((x, y) => (y.estado === "Pendiente") - (x.estado === "Pendiente"));
 
-  const resolver = (id, aprobar) => {
+  const resolver = async (id, aprobar) => {
+    if (apiActiva()) {
+      try {
+        await peticion(`/abonos/${id}`, { metodo: "PATCH", datos: { aprobar } }, true);
+        await cargarDatosDeCuenta();
+        mostrarAviso("Abono actualizado.");
+      } catch (error) { mostrarAviso(error.message, false); }
+      return;
+    }
     const res = resolverAbono(id, aprobar);
     mostrarAviso(res.mensaje, res.exito);
   };

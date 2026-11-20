@@ -1,3 +1,4 @@
+import { apiActiva, cargarDatosDeCuenta, peticion } from "../lib/api";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { EtiquetaMedio } from "./CartolaCuentaCorriente";
@@ -47,9 +48,20 @@ export default function CuentaCorriente({ usuario, conEnlace = true }) {
     setModalAbierto(true);
   };
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault();
     if (!form.validarTodo()) return;
+    if (apiActiva()) {
+      try {
+        await peticion("/abonos", { metodo: "POST", datos: {
+          monto: Number(form.valores.monto), detalle: form.valores.detalle, medio: form.valores.medio
+        } }, true);
+        await cargarDatosDeCuenta();
+        mostrarAviso("Abono enviado para revisión.");
+        form.reiniciar();
+      } catch (error) { mostrarAviso(error.message, false); }
+      return;
+    }
     const res = solicitarAbono(usuario.id, form.valores.monto, form.valores.detalle, form.valores.medio);
     mostrarAviso(res.mensaje, res.exito);
     if (res.exito) setModalAbierto(false);

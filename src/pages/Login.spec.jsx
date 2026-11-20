@@ -1,3 +1,5 @@
+import { act } from "react-dom/test-utils";
+import { cerrarSesionApi, usuarioRemoto } from "../lib/api";
 import Login from "./Login";
 import { desmontarTodo, enviarFormulario, escribir, montar } from "../testing/utils";
 import { asegurarCuentasDemo, obtenerSesionActual } from "../lib/usuarios";
@@ -7,7 +9,10 @@ describe("Página Login", () => {
     localStorage.clear();
     asegurarCuentasDemo();
   });
-  afterEach(desmontarTodo);
+  afterEach(async () => {
+    desmontarTodo();
+    if (usuarioRemoto()) await cerrarSesionApi();
+  });
 
   it("enviar el formulario vacío marca los dos campos en rojo", () => {
     const vista = montar(<Login />);
@@ -25,21 +30,27 @@ describe("Página Login", () => {
     expect(obtenerSesionActual()).toBeNull();
   });
 
-  it("con credenciales incorrectas muestra el error y no inicia sesión", () => {
+  it("con credenciales incorrectas muestra el error y no inicia sesión", async () => {
+    spyOn(window, "fetch").and.resolveTo(new Response(JSON.stringify({ message: "Correo o contraseña incorrectos." }), { status: 401 }));
     const vista = montar(<Login />);
     escribir(vista.querySelector("#correo"), "cliente@maestros.cl");
     escribir(vista.querySelector("#clave"), "incorrecta");
-    enviarFormulario(vista.querySelector("form"));
+    await act(async () => enviarFormulario(vista.querySelector("form")));
     expect(vista.querySelector("p[role=alert]").textContent).toBe("Correo o contraseña incorrectos.");
     expect(obtenerSesionActual()).toBeNull();
   });
 
-  it("con credenciales correctas inicia sesión", () => {
+  it("con credenciales correctas inicia sesión", async () => {
+    spyOn(window, "fetch").and.returnValues(
+      Promise.resolve(new Response(JSON.stringify({ token: "prueba", usuario: { rol: "cliente" } }))),
+      Promise.resolve(new Response("[]")),
+      Promise.resolve(new Response(null, { status: 204 }))
+    );
     const vista = montar(<Login />);
     escribir(vista.querySelector("#correo"), "cliente@maestros.cl");
     escribir(vista.querySelector("#clave"), "cliente123");
-    enviarFormulario(vista.querySelector("form"));
-    expect(obtenerSesionActual().rol).toBe("cliente");
+    await act(async () => enviarFormulario(vista.querySelector("form")));
+    expect(usuarioRemoto().rol).toBe("cliente");
   });
 
   it("muestra el aviso verde cuando viene de registrarse", () => {

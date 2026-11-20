@@ -1,10 +1,11 @@
+import { peticion } from "../lib/api";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import CampoFormulario from "../components/CampoFormulario";
 import Logo from "../components/Logo";
 import PiePagina from "../components/PiePagina";
 import { useFormulario } from "../hooks/useFormulario";
-import { mensajeDuplicado, mensajeResumenErrores, registrarUsuario, validarUsuario } from "../lib/usuarios";
+import { mensajeDuplicado, mensajeResumenErrores, validarUsuario } from "../lib/usuarios";
 import {
   mensajeErrorClave, mensajeErrorCorreo, mensajeErrorNombre, mensajeErrorRut, mensajeErrorTelefono
 } from "../lib/validaciones";
@@ -27,7 +28,7 @@ export default function Registro() {
   );
   const { valores } = form;
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault();
     setResumenError("");
 
@@ -38,10 +39,11 @@ export default function Registro() {
     }
 
     // 2) Registro (aquí también se revisa que RUT, correo y teléfono no existan ya)
-    const res = registrarUsuario(valores.nombre, valores.rut, valores.correo, valores.telefono, valores.clave);
-    if (!res.exito) {
-      form.ponerErrores(res.errores || {});
-      setResumenError(res.mensaje);
+    try {
+      const { nombre, rut, correo, telefono, clave } = valores;
+      await peticion("/auth/registro", { metodo: "POST", datos: { nombre, rut, correo, telefono, clave } });
+    } catch (error) {
+      setResumenError(error.message);
       return;
     }
     navigate("/login?registro=ok");

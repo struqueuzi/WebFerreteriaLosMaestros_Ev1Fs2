@@ -1,3 +1,4 @@
+import { apiActiva, productosRemotos } from "./api";
 // ========================================================
 // productos.js - Categorías, catálogo y filtros
 // ========================================================
@@ -64,6 +65,7 @@ export function mensajeErrorDescuento(valor) {
 }
 
 export function obtenerProductos() {
+  if (apiActiva()) return productosRemotos();
   return leer("productos", []);
 }
 

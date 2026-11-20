@@ -1,3 +1,4 @@
+import { apiActiva, pedidosRemotos } from "./api";
 // ========================================================
 // pedidos.js - Carrito, pedidos con rebaja de stock, historial de ventas y reportes
 // ========================================================
@@ -108,6 +109,7 @@ export function cantidadEnCarrito() {
 // PEDIDOS Y REBAJA DE STOCK
 // --------------------------------------------------------
 export function obtenerPedidos() {
+  if (apiActiva()) return pedidosRemotos();
   return leer("pedidos", []);
 }
 

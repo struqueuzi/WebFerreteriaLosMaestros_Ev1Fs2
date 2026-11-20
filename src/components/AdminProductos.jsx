@@ -1,3 +1,4 @@
+import { cambiarProducto } from "../lib/api";
 import { useState } from "react";
 import CampoFormulario from "./CampoFormulario";
 import { useAlmacen } from "../hooks/useAlmacen";
@@ -5,7 +6,7 @@ import { useFormulario } from "../hooks/useFormulario";
 import { useAviso } from "../context/AvisoContext";
 import { formatoPesos } from "../lib/formato";
 import {
-  categoriasDisponibles, descuentoDe, guardarProductos, IMAGEN_POR_DEFECTO, mensajeErrorDescuento,
+  categoriasDisponibles, descuentoDe, IMAGEN_POR_DEFECTO, mensajeErrorDescuento,
   obtenerProductos, precioFinal, subcategoriasDe
 } from "../lib/productos";
 import { mensajeErrorMontoEntero } from "../lib/validaciones";
@@ -78,7 +79,7 @@ function ProductoEditable({ producto }) {
   const cambiar = (parcial) => setCampos((c) => ({ ...c, ...parcial }));
   const campo = (nombre) => ({ id: `${nombre}-${producto.id}`, value: campos[nombre], onChange: (e) => cambiar({ [nombre]: e.target.value }), error: errores[nombre] || "", pequeno: true, className: "mb-2" });
 
-  const guardar = () => {
+  const guardar = async () => {
     const nuevos = {};
     if (campos.nombre.trim().length < 3) nuevos.nombre = "El nombre debe tener al menos 3 caracteres.";
     if (mensajeErrorMontoEntero(campos.precio, 1)) nuevos.precio = "El precio debe ser un entero mayor a 0.";
@@ -89,21 +90,27 @@ function ProductoEditable({ producto }) {
     setMensaje("");
     if (Object.keys(nuevos).length > 0) return;
 
-    const todos = obtenerProductos();
-    const objetivo = todos.find((p) => p.id === producto.id);
-    if (!objetivo) return;
-    Object.assign(objetivo, {
-      nombre: campos.nombre.trim(), precio: Number(campos.precio), stock: Number(campos.stock),
-      imagen: campos.imagen.trim() || IMAGEN_POR_DEFECTO, categoria: campos.categoria, subcategoria: campos.subcategoria,
-      descuento: Number(campos.descuento) || 0, esNuevo: campos.esNuevo
-    });
-    guardarProductos(todos);
+    try {
+      await cambiarProducto(producto.id, "PUT", {
+        nombre: campos.nombre.trim(), precio: Number(campos.precio), stock: Number(campos.stock),
+        imagen: campos.imagen.trim() || IMAGEN_POR_DEFECTO, categoria: campos.categoria, subcategoria: campos.subcategoria,
+        descuento: Number(campos.descuento) || 0, esNuevo: campos.esNuevo
+      });
+    } catch (error) {
+      mostrarAviso(error.message, false);
+      return;
+    }
     setMensaje("Producto actualizado correctamente ✔");
   };
 
-  const eliminar = () => {
+  const eliminar = async () => {
     if (!window.confirm(`¿Eliminar "${producto.nombre}" del catálogo? Esta acción no se puede deshacer.`)) return;
-    guardarProductos(obtenerProductos().filter((p) => p.id !== producto.id));
+    try {
+      await cambiarProducto(producto.id, "DELETE");
+    } catch (error) {
+      mostrarAviso(error.message, false);
+      return;
+    }
     mostrarAviso("Producto eliminado.");
   };
 
@@ -147,17 +154,19 @@ function FormularioProducto() {
   });
   const { valores } = form;
 
-  const agregar = (e) => {
+  const agregar = async (e) => {
     e.preventDefault();
     if (!form.validarTodo()) return;
-    guardarProductos([
-      ...obtenerProductos(),
-      {
-        id: Date.now(), nombre: valores.nombre.trim(), precio: Number(valores.precio), stock: Number(valores.stock),
+    try {
+      await cambiarProducto(null, "POST", {
+        nombre: valores.nombre.trim(), precio: Number(valores.precio), stock: Number(valores.stock),
         imagen: valores.imagen.trim() || IMAGEN_POR_DEFECTO, categoria: valores.categoria, subcategoria: valores.subcategoria,
         descuento: Number(valores.descuento) || 0, esNuevo: valores.esNuevo
-      }
-    ]);
+      });
+    } catch (error) {
+      mostrarAviso(error.message, false);
+      return;
+    }
     form.reiniciar();
     mostrarAviso("Producto agregado al catálogo.");
   };

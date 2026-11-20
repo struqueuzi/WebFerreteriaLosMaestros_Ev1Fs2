@@ -1,10 +1,11 @@
+import { iniciarSesionApi } from "../lib/api";
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import CampoFormulario from "../components/CampoFormulario";
 import Logo from "../components/Logo";
 import PiePagina from "../components/PiePagina";
 import { useFormulario } from "../hooks/useFormulario";
-import { iniciarSesion, rutaPanelPorRol } from "../lib/usuarios";
+import { rutaPanelPorRol } from "../lib/usuarios";
 import { mensajeErrorCorreo } from "../lib/validaciones";
 
 export default function Login() {
@@ -17,12 +18,12 @@ export default function Login() {
     clave: (v) => (v.clave ? "" : "Ingresa tu contraseña.")
   });
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault();
     setErrorLogin("");
     if (!form.validarTodo()) return;
 
-    const res = iniciarSesion(form.valores.correo, form.valores.clave);
+    const res = await iniciarSesionApi(form.valores.correo, form.valores.clave);
     if (!res.exito) {
       setErrorLogin(res.mensaje);
       return;

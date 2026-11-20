@@ -1,3 +1,4 @@
+import { act } from "react-dom/test-utils";
 import Registro from "./Registro";
 import { desmontarTodo, enviarFormulario, escribir, montar, salir } from "../testing/utils";
 import { asegurarCuentasDemo, obtenerUsuarios } from "../lib/usuarios";
@@ -36,16 +37,19 @@ describe("Página Registro", () => {
     expect(obtenerUsuarios().length).toBe(4);
   });
 
-  it("con datos correctos crea la cuenta de cliente", () => {
+  it("con datos correctos envía el registro al backend", async () => {
+    const api = spyOn(window, "fetch").and.resolveTo(new Response(null, { status: 201 }));
     const vista = montar(<Registro />);
     llenar(vista, {
       nombre: "Juan Pérez", rut: "10000000-8", correo: "juan@correo.cl",
       telefono: "+56987654321", clave: "secreta1", clave2: "secreta1"
     });
-    enviarFormulario(vista.querySelector("form"));
-    const nuevo = obtenerUsuarios().find((u) => u.correo === "juan@correo.cl");
-    expect(nuevo).toBeDefined();
-    expect(nuevo.rol).toBe("cliente");
-    expect(nuevo.cuentaCorriente).toBeFalse();
+    await act(async () => enviarFormulario(vista.querySelector("form")));
+    const [url, opciones] = api.calls.mostRecent().args;
+    expect(url).toBe("/api/v1/auth/registro");
+    expect(opciones.method).toBe("POST");
+    expect(JSON.parse(opciones.body)).toEqual({
+      nombre: "Juan Pérez", rut: "10000000-8", correo: "juan@correo.cl", telefono: "+56987654321", clave: "secreta1"
+    });
   });
 });

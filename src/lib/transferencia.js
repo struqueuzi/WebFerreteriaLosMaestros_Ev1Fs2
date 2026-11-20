@@ -1,3 +1,4 @@
+import { apiActiva, transferenciaRemota } from "./api";
 // ========================================================
 // transferencia.js - Cuenta bancaria a la que el cliente transfiere.
 // Los datos quedan en localStorage y el administrador los puede cambiar desde su panel.
@@ -23,6 +24,7 @@ export const DATOS_TRANSFERENCIA_POR_DEFECTO = {
 };
 
 export function obtenerDatosTransferencia() {
+  if (apiActiva()) return transferenciaRemota();
   return { ...DATOS_TRANSFERENCIA_POR_DEFECTO, ...leer("datos_transferencia", {}) };
 }
 
